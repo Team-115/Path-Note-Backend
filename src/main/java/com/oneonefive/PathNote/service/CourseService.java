@@ -29,4 +29,8 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
+    public void deleteCourseById(Long course_id){
+        courseRepository.deleteById(course_id);
+    }
+
 }
