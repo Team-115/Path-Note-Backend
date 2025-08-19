@@ -25,4 +25,8 @@ public class CourseService {
         return course.orElse(null);
     }
 
+    public Course createCourse(Course course) {
+        return courseRepository.save(course);
+    }
+
 }

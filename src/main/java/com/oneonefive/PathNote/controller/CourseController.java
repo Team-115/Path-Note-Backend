@@ -43,5 +43,11 @@ public class CourseController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @PostMapping
+    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
+        Course createdCourse = courseService.createCourse(course);
+        return new ResponseEntity<>(createdCourse, HttpStatus.OK);
+    }
     
 }
