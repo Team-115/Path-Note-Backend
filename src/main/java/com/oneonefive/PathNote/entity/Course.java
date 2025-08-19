@@ -2,6 +2,9 @@ package com.oneonefive.PathNote.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,11 +24,13 @@ import lombok.NoArgsConstructor;
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "course_id")
     private Long course_id;
 
     private String course_name;
     private String course_description;
     private String course_category;
 
+    @CreationTimestamp
     private LocalDateTime created_at;
 }
