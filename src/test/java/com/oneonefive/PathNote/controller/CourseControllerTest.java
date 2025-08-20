@@ -1,4 +1,3 @@
-// src/test/java/com/oneonefive/PathNote/controller/CourseControllerTest.java
 package com.oneonefive.PathNote.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,17 +20,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given; // BDD 스타일 스텁
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-// ↓↓↓ MockMvc용 ResultMatchers 를 사용해야 한다!
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(CourseController.class)
 @AutoConfigureMockMvc(addFilters = false) // 시큐리티 제외
 class CourseControllerTest {
-
+    /**
+     * MockMvc 내용 추가 필요
+     */
     @Autowired MockMvc mockMvc;           // 서버 없이 MVC 요청 시뮬레이션
     @Autowired ObjectMapper objectMapper; // 자바 객체 JSON으로 직렬화/역직렬화
 
@@ -69,4 +68,105 @@ class CourseControllerTest {
         verify(courseService).findCourseAll();
 
     }
+
+    @DisplayName("POST /api/courses - 코스 생성: 200과 생성된 코스 반환")
+    @Test
+    void createCourse() throws Exception {
+        // given: 요청으로 들어갈 Course 객체와 서비스가 반환할 더미 데이터 준비
+        Course requestCourse = new Course(null, "코스C", "코스C 설명", "힐링 여행", LocalDateTime.now());
+        Course responseCourse = new Course(3L, "코스C", "코스C 설명", "힐링 여행", requestCourse.getCreated_at());
+
+        // courseService.createCourse 호출 시 responseCourse를 반환하도록 스텁
+        given(courseService.createCourse(any(Course.class))).willReturn(responseCourse);
+
+        // when: POST 요청 수행
+        MvcResult result = mockMvc.perform(
+                post("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON)          // 요청 타입: JSON
+                        .content(objectMapper.writeValueAsString(requestCourse)) // 요청 바디 JSON 직렬화
+        ).andReturn();
+
+        MockHttpServletResponse res = result.getResponse();
+
+        // then: 응답 검증
+        assertThat(res.getStatus()).isEqualTo(HttpStatus.OK.value());   // 상태코드 200
+        assertThat(res.getContentType()).contains(MediaType.APPLICATION_JSON_VALUE);
+
+        Course body = objectMapper.readValue(res.getContentAsString(), Course.class);
+
+        assertThat(body.getCourse_id()).isEqualTo(3L);
+        assertThat(body.getCourse_name()).isEqualTo("코스C");
+        assertThat(body.getCourse_category()).isEqualTo("힐링 여행");
+
+    }
+
+    @DisplayName("GET /api/courses/{id} - 존재하는 코스: 200과 코스 반환")
+    @Test
+    void getCourseById_found() throws Exception {
+        // given
+        Long id = 1L;
+        Course course = new Course(
+                id,
+                "코스A",
+                "코스A 설명",
+                "낭만 여행",
+                LocalDateTime.now()
+        );
+        given(courseService.findCourseById(id)).willReturn(course);
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/courses/{course_id}", id))
+                .andReturn();
+        MockHttpServletResponse res = result.getResponse();
+
+        // then
+        assertThat(res.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(res.getContentType()).contains(MediaType.APPLICATION_JSON_VALUE);
+
+        Course body = objectMapper.readValue(res.getContentAsString(), Course.class);
+        assertThat(body.getCourse_id()).isEqualTo(id);
+        assertThat(body.getCourse_name()).isEqualTo("코스A");
+        assertThat(body.getCourse_category()).isEqualTo("낭만 여행");
+
+        verify(courseService).findCourseById(id);
+    }
+
+    @DisplayName("GET /api/courses/{id} - 없는 코스: 404 반환 (바디 없음)")
+    @Test
+    void getCourseById_notFound() throws Exception {
+        // given
+        Long id = 999L;
+        given(courseService.findCourseById(id)).willReturn(null);
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/courses/{course_id}", id))
+                .andReturn();
+        MockHttpServletResponse res = result.getResponse();
+
+        // then
+        assertThat(res.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(res.getContentAsString()).isEmpty();
+
+        verify(courseService).findCourseById(id);
+    }
+
+    @DisplayName("DELETE /api/courses/{id} - 코스 삭제 성공 시 204 반환")
+    @Test
+    void deleteCourseById_success() throws Exception {
+        // given
+        Long id = 1L;
+
+        // when
+        MvcResult result = mockMvc.perform(delete("/api/courses/{course_id}", id))
+                .andReturn();
+        MockHttpServletResponse res = result.getResponse();
+
+        // then
+        assertThat(res.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+        assertThat(res.getContentAsString()).isEmpty(); // 바디 없음 확인
+
+        // 서비스가 해당 id로 deleteCourseById를 호출했는지 검증
+        verify(courseService).deleteCourseById(id);
+    }
+
 }
