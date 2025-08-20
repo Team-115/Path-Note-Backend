@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.oneonefive.PathNote.entity.Course;
-import com.oneonefive.PathNote.repository.CourseRepository;
+import com.oneonefive.PathNote.entity.Place;
+import com.oneonefive.PathNote.repository.PlaceRepository;
 
 @Service
 public class PlaceService {
