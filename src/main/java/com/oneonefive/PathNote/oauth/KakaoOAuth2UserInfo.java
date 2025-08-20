@@ -14,14 +14,6 @@ public class KakaoOAuth2UserInfo {
         return String.valueOf(attributes.get("id"));
     }
 
-    public String getEmail() {
-        Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
-        if (account == null) {
-            return null;
-        }
-        return (String) account.get("email");
-    }
-
     public String getNickname() {
         Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
         if (account == null) {
@@ -32,13 +24,5 @@ public class KakaoOAuth2UserInfo {
             return null;
         }
         return (String) profile.get("nickname");
-    }
-
-    public String getName() {
-        Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
-        if (account == null) {
-            return null;
-        }
-        return (String) account.get("name");
     }
 }

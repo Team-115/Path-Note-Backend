@@ -26,19 +26,11 @@ public class User {
     private String nickname;
 
     @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     // 업데이트용 메서드
-    public User update(String nickname, String email, String name) {
+    public User update(String nickname) {
         this.nickname = nickname;
-        this.email = email;
-        this.name = name;
         return this;
     }
 }

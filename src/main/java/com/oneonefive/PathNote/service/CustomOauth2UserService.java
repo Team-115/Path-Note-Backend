@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Collections;
 
 @Service
@@ -39,21 +40,22 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private OAuth2User processKakaoUser(Map<String, Object> attributes) {
         KakaoOAuth2UserInfo userInfo = new KakaoOAuth2UserInfo(attributes);
+        Optional<User> optionalUser = userRepository.findByKakaoId(userInfo.getKakaoId());
         
-        User user = userRepository.findByKakaoId(userInfo.getKakaoId())
-                .map(entity -> entity.update(
-                        userInfo.getNickname(), 
-                        userInfo.getEmail(), 
-                        userInfo.getName()
-                ))
-                .orElse(new User(
-                        null, // user_id는 자동 생성
-                        userInfo.getKakaoId(),
-                        userInfo.getNickname(),
-                        userInfo.getEmail(),
-                        userInfo.getName(),
-                        LocalDateTime.now()
-                ));
+        User user;
+
+        if (optionalUser.isPresent()) {
+                // 기존 사용자 업데이트
+            user = optionalUser.get().update(userInfo.getNickname());
+        } else {
+                // 새 사용자 생성
+            user = new User(
+                    null,
+                    userInfo.getKakaoId(),
+                    userInfo.getNickname(),
+                    LocalDateTime.now()
+            );
+        }
 
         userRepository.save(user);
 
