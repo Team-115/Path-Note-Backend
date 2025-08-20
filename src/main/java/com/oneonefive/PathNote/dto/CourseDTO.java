@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.oneonefive.PathNote.entity.Course;
-import com.oneonefive.PathNote.entity.CoursePlace;
 import com.oneonefive.PathNote.repository.CoursePlaceRepository;
 
 import lombok.Getter;
@@ -22,16 +21,6 @@ public class CourseDTO {
     private String course_name;
     private String course_description;
     private String course_category;
-    private List<CoursePlace> coursePlaces;
+    private List<CoursePlaceDTO> coursePlaces;
     
-    @Autowired
-    private CoursePlaceRepository coursePlaceRepository;
-
-    public CourseDTO(Course course) {
-        this.course_id = course.getCourse_id();
-        this.course_name = course.getCourse_name();
-        this.course_description = course.getCourse_description();
-        this.course_category = course.getCourse_category();
-        coursePlaces = new ArrayList<CoursePlace>();
-    }
 }

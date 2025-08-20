@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaceDTO {
-    
+public class CoursePlaceDTO {
+
     private Long poi_id;
     private Long sequence_index;
     private String place_name;
+    private String place_category;
     private String place_address;
     private Double place_coordinate_x;
     private Double place_coordinate_y;
-    private String place_category;
     private LocalDateTime place_enter_time;
     private LocalDateTime place_leave_time;
     private String place_tel;
