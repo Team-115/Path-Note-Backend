@@ -1,7 +1,5 @@
 package com.oneonefive.PathNote.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,14 +20,12 @@ import lombok.NoArgsConstructor;
 public class Place {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "course_id")
+    @Column(name = "place_id")
     private Long place_id;
+    private Long poi_id;
     private String place_name;
-    private String place_address;
-    private int place_coordinate_x;
-    private int place_cooridnate_y;
     private String place_category;
-    private LocalDateTime place_leave_time;
-    private LocalDateTime place_enter_time;
-    private String place_tel;
+    private String place_address;
+    private Double place_coordinate_x;
+    private Double place_coordinate_y;
 }

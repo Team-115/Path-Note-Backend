@@ -2,11 +2,13 @@ package com.oneonefive.PathNote.dto;
 
 import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CoursePlaceDTO {
@@ -20,6 +22,5 @@ public class CoursePlaceDTO {
     private Double place_coordinate_y;
     private LocalDateTime place_enter_time;
     private LocalDateTime place_leave_time;
-    private String place_tel;
     
 }

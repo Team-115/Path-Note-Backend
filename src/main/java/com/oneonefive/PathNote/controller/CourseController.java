@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.service.CourseService;
 
@@ -32,11 +33,11 @@ public class CourseController {
     }
 
     @GetMapping("/{course_id}")
-    public ResponseEntity<Course> getCourseById(@PathVariable Long course_id) {
-        Course course = courseService.findCourseById(course_id);
+    public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long course_id) {
+        CourseDTO courseDTO = courseService.findCourseById(course_id);
 
-        if (course != null) {
-            return new ResponseEntity<>(course, HttpStatus.OK);
+        if (courseDTO != null) {
+            return new ResponseEntity<>(courseDTO, HttpStatus.OK);
         }
         else
         {

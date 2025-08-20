@@ -1,18 +1,15 @@
 package com.oneonefive.PathNote.dto;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.oneonefive.PathNote.entity.Course;
-import com.oneonefive.PathNote.repository.CoursePlaceRepository;
-
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseDTO {
@@ -21,6 +18,7 @@ public class CourseDTO {
     private String course_name;
     private String course_description;
     private String course_category;
+    private LocalDateTime created_at;
     private List<CoursePlaceDTO> coursePlaces;
     
 }
