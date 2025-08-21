@@ -28,7 +28,7 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
-    private Long course_id;
+    private Long courseId;
 
     // 코스 이름
     private String course_name;
@@ -44,4 +44,5 @@ public class Course {
     // 코스-장소 리스트
     @OneToMany(mappedBy = "course")
     private List<CoursePlace> coursePlaces;
+
 }

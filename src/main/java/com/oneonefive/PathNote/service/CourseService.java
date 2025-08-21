@@ -29,7 +29,7 @@ public class CourseService {
         // 코스 엔티티 조회
         Course course = courseRepository.findById(course_id).orElse(null);
         CourseDTO courseDTO = new CourseDTO(
-            course.getCourse_id(),
+            course.getCourseId(),
             course.getCourse_name(),
             course.getCourse_description(),
             course.getCourse_category(),
