@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "course_places")
 public class CoursePlace {
     
-    // 코스-장소 고유 id
+    // 코스-장소 ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "courseplace_id")

@@ -27,11 +27,17 @@ public class CourseController {
     @Autowired
     private final CourseService courseService;
 
+    // GET /api/courses
+    // 코스 전체 조회
+    // 코스 페이지 열람시 우측 컴포넌트에 표시
     @GetMapping
     public List<Course> getAllCourses() {
         return courseService.findCourseAll();
     }
 
+    // GET /api/courses/{course_id}
+    // 코스 단일 조회
+    // 코스 페이지 열람 후 우측 컴포넌트 클릭 시 조회
     @GetMapping("/{course_id}")
     public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long course_id) {
         CourseDTO courseDTO = courseService.findCourseById(course_id);
@@ -45,12 +51,18 @@ public class CourseController {
         }
     }
 
+    // POST /api/courses
+    // 코스 신규 등록
+    // 코스 완성 후 업로드 시 등록
     @PostMapping
     public ResponseEntity<Course> createCourse(@RequestBody Course course) {
         Course createdCourse = courseService.createCourse(course);
         return new ResponseEntity<>(createdCourse, HttpStatus.OK);
     }
 
+    // DELETE /api/courses/{course_id}
+    // 코스 삭제
+    // 만들었던 코스를 삭제, 본인이 만든 코스만 삭제 가능
     @DeleteMapping("/{course_id}")
     public ResponseEntity<Void> deleteCourseById(@PathVariable Long course_id) {
         courseService.deleteCourseById(course_id);
