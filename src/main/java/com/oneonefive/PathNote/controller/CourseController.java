@@ -32,7 +32,7 @@ public class CourseController {
     // 코스 전체 조회
     // 코스 페이지 열람시 우측 컴포넌트에 표시
     @GetMapping
-    public List<Course> getAllCourses() {
+    public List<CourseDTO> getAllCourses() {
         return courseService.findCourseAll();
     }
 
