@@ -55,8 +55,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     null,
                     userInfo.getKakaoId(),
                     userInfo.getNickname(),
-                    "A01",
-                    LocalDateTime.now()
+                    LocalDateTime.now(),
+                    "A01"
             );
         }
 
