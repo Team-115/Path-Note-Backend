@@ -30,7 +30,7 @@ public class CourseService {
         for (Course course : courses) {
 
             // (코스-장소 DTO 리스트) 생성
-            List<CoursePlaceDTO> coursePlaces = new ArrayList<>();
+            List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
             for (CoursePlace coursePlace : course.getCoursePlaces()) {
                 CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                     coursePlace.getPlace().getPoiId(),
@@ -43,7 +43,7 @@ public class CourseService {
                     coursePlace.getEnterTime(),
                     coursePlace.getLeaveTime()
                     );
-                coursePlaces.add(coursePlaceDTO);
+                coursePlaceDTOs.add(coursePlaceDTO);
             }
 
             // (코스 DTO) 생성
@@ -54,7 +54,7 @@ public class CourseService {
                 course.getCourseCategory(),
                 course.getCreatedAt(),
                 course.getLikeCount(),
-                coursePlaces
+                coursePlaceDTOs
             );
 
             // (코스 DTO 리스트)에 (코스 DTO) 추가
@@ -82,8 +82,7 @@ public class CourseService {
         );
 
         // 코스-장소 DTO 리스트 생성
-        List<CoursePlaceDTO> coursePlaces = new ArrayList<>();
-        
+        List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
 
         // course_id를 가지고있는 코스-장소들을 코스-장소 DTO 리스트에 저장
         for (CoursePlace coursePlace : course.getCoursePlaces()) {
@@ -98,11 +97,11 @@ public class CourseService {
                 coursePlace.getEnterTime(),
                 coursePlace.getLeaveTime()
                 );
-            coursePlaces.add(coursePlaceDTO);
+            coursePlaceDTOs.add(coursePlaceDTO);
         }
 
         // 코스 DTO에 코스-장소 DTO 리스트 저장
-        courseDTO.setCoursePlaces(coursePlaces);
+        courseDTO.setCourse_Places(coursePlaceDTOs);
         return courseDTO;
 
     }
@@ -110,17 +109,40 @@ public class CourseService {
     // 코스 생성
     @Transactional
     public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
-        Course createdCourse = new Course();
-        createdCourse.setCourseName(courseRequestDTO.getCourse_name());
-        createdCourse.setCourseDescription(courseRequestDTO.getCourse_description());
-        createdCourse.setCourseCategory(courseRequestDTO.getCourse_category());
+        Course course = new Course();
+        course.setUserId(courseRequestDTO.getUser_id());
+        course.setCourseName(courseRequestDTO.getCourse_name());
+        course.setCourseDescription(courseRequestDTO.getCourse_description());
+        course.setCourseCategory(courseRequestDTO.getCourse_category());
+        List<CoursePlace> coursePlaces = new ArrayList<>();
+        course.setCoursePlaces(coursePlaces);
 
-        courseRepository.save(createdCourse);
+        course = courseRepository.save(course);
+        // 코스-장소 DTO 리스트 생성
+        List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
+        for (CoursePlace coursePlace : course.getCoursePlaces()) {
+            CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
+                coursePlace.getPlace().getPoiId(),
+                coursePlace.getSequenceIndex(),
+                coursePlace.getPlace().getPlaceName(),
+                coursePlace.getPlace().getPlaceCategory(),
+                coursePlace.getPlace().getPlaceAddress(),
+                coursePlace.getPlace().getPlaceCoordinateX(),
+                coursePlace.getPlace().getPlaceCoordinateY(),
+                coursePlace.getEnterTime(),
+                coursePlace.getLeaveTime()
+                );
+            coursePlaceDTOs.add(coursePlaceDTO);
+        }
 
         CourseDTO courseDTO = new CourseDTO();
-        courseDTO.setCourse_name(createdCourse.getCourseName());
-        courseDTO.setCourse_description(createdCourse.getCourseDescription());
-        courseDTO.setCourse_category(createdCourse.getCourseCategory());
+        courseDTO.setCourse_id(course.getCourseId());
+        courseDTO.setCourse_name(course.getCourseName());
+        courseDTO.setCourse_description(course.getCourseDescription());
+        courseDTO.setCourse_category(course.getCourseCategory());
+        courseDTO.setCreated_at(course.getCreatedAt());
+        courseDTO.setLike_Count(course.getLikeCount());
+        courseDTO.setCourse_Places(coursePlaceDTOs);
         
         // 코스 DTO 반환
         return courseDTO;

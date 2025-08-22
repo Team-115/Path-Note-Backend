@@ -51,7 +51,7 @@ public class Course {
 
     // 좋아요 갯수 (트랜잭션으로 관리할 것)
     @Column(name = "like_count")
-    private Long likeCount;
+    private Long likeCount = 0L;
 
     // 코스-장소 리스트
     @OneToMany(mappedBy = "course")
