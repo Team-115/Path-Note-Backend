@@ -1,0 +1,48 @@
+server:
+  port: 8080
+  error:
+    include-stacktrace: always
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/pathnote?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: pathnote_user
+    password: 12345
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+  
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: e8a0d491ab974f06ce7823b9a8173ca1
+            client-secret:
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: Kakao
+            scope:
+              - profile_nickname
+              
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+jwt:
+  secret: pathnote-secret-key-for-jwt-token-generation-and-validation-2024
+  access-token-expiration: 3600000  # 1시간 (밀리초)
+  refresh-token-expiration: 604800000  # 7일 (밀리초)
