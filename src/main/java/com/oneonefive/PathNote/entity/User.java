@@ -2,17 +2,11 @@ package com.oneonefive.PathNote.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -21,19 +15,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "users")
 public class User {
-    // 회원 ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long user_id;
+    private Long userId;
 
-    // 카카오톡 ID
-    private String kakao_id;
-    // 닉네임
+    @Column(name = "kakao_id", nullable = false)
+    private String kakaoId;
+    
+    @Column(nullable = false)
     private String nickname;
-    // 계정 생성 시간
-    private LocalDateTime created_at;
-    // 프로필 이미지
-    private String profile_preset;
 
+    @Column(name = "profile_preset", nullable = false)
+    private String profilePreset;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    // 닉네임, 프로필 업데이트 메서드
+    public User update(String nickname, String profilePreset) {
+        this.nickname = nickname;
+        this.profilePreset = profilePreset;
+        return this;
+    }
+
+    // 닉네임 업데이트 메서드
+    public User update(String nickname) {
+        this.nickname = nickname;
+        return this;
+    }
 }
