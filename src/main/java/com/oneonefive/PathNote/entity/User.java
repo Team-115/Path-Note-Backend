@@ -1,4 +1,5 @@
 package com.oneonefive.PathNote.entity;
+
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;

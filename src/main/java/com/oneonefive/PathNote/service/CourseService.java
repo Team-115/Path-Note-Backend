@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceDTO;
+import com.oneonefive.PathNote.dto.CourseRequestDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
 import com.oneonefive.PathNote.repository.CourseRepository;
@@ -19,8 +20,46 @@ public class CourseService {
     private CourseRepository courseRepository;
 
     // 코스 전체 조회
-    public List<Course> findCourseAll() {
-        return courseRepository.findAll();
+    public List<CourseDTO> findCourseAll() {
+        List<Course> courses = courseRepository.findAll();
+        List<CourseDTO> courseDTOs = new ArrayList<>();
+
+        for (Course course : courses) {
+
+            // (코스-장소 DTO 리스트) 생성
+            List<CoursePlaceDTO> coursePlaces = new ArrayList<>();
+            for (CoursePlace coursePlace : course.getCoursePlaces()) {
+                CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
+                    coursePlace.getPlace().getPoi_id(),
+                    coursePlace.getSequence_index(),
+                    coursePlace.getPlace().getPlace_name(),
+                    coursePlace.getPlace().getPlace_category(),
+                    coursePlace.getPlace().getPlace_address(),
+                    coursePlace.getPlace().getPlace_coordinate_x(),
+                    coursePlace.getPlace().getPlace_coordinate_y(),
+                    coursePlace.getEnter_time(),
+                    coursePlace.getLeave_time()
+                    );
+                coursePlaces.add(coursePlaceDTO);
+            }
+
+            // (코스 DTO) 생성
+            CourseDTO courseDTO = new CourseDTO(
+                course.getCourseId(),
+                course.getCourse_name(),
+                course.getCourse_description(),
+                course.getCourse_category(),
+                course.getCreated_at(),
+                course.getLikeCount(),
+                coursePlaces
+            );
+
+            // (코스 DTO 리스트)에 (코스 DTO) 추가
+            courseDTOs.add(courseDTO);
+        }
+
+        // (코스 DTO 리스트) 반환
+        return courseDTOs;
     }
 
     // 코스 단일 조회 (course_id)
@@ -29,11 +68,12 @@ public class CourseService {
         // 코스 엔티티 조회
         Course course = courseRepository.findById(course_id).orElse(null);
         CourseDTO courseDTO = new CourseDTO(
-            course.getCourse_id(),
+            course.getCourseId(),
             course.getCourse_name(),
             course.getCourse_description(),
             course.getCourse_category(),
             course.getCreated_at(),
+            course.getLikeCount(),
             new ArrayList<>()
         );
 
@@ -69,8 +109,21 @@ public class CourseService {
     }
 
     // 코스 생성
-    public Course createCourse(Course course) {
-        return courseRepository.save(course);
+    public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
+        Course createdCourse = new Course();
+        createdCourse.setCourse_name(courseRequestDTO.getCourse_name());
+        createdCourse.setCourse_description(courseRequestDTO.getCourse_description());
+        createdCourse.setCourse_category(courseRequestDTO.getCourse_category());
+
+        courseRepository.save(createdCourse);
+
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourse_name(createdCourse.getCourse_name());
+        courseDTO.setCourse_description(createdCourse.getCourse_description());
+        courseDTO.setCourse_category(createdCourse.getCourse_category());
+        
+        // 코스 DTO 반환
+        return courseDTO;
     }
 
     // 코스 제거

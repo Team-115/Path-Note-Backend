@@ -28,7 +28,10 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
-    private Long course_id;
+    private Long courseId;
+
+    
+    private Long userId;
 
     // 코스 이름
     private String course_name;
@@ -41,7 +44,11 @@ public class Course {
     @CreationTimestamp
     private LocalDateTime created_at;
 
+    // 좋아요 갯수 (트랜잭션으로 관리할 것)
+    private Long likeCount;
+
     // 코스-장소 리스트
     @OneToMany(mappedBy = "course")
     private List<CoursePlace> coursePlaces;
+
 }
