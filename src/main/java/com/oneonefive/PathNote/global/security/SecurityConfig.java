@@ -4,22 +4,43 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.oneonefive.PathNote.service.CustomOauth2UserService;
+import com.oneonefive.PathNote.filter.JwtAuthenticationFilter;
+import com.oneonefive.PathNote.oauth.OAuth2AuthenticationSuccessHandler;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // 모든 요청에 대해 인증 없이 접근을 허용합니다.
-        http
-            .authorizeHttpRequests(authorize -> authorize
-                .anyRequest().permitAll()
-            );
+    private final CustomOauth2UserService customOauth2UserService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
-        // CSRF 보호를 비활성화합니다. (개발 단계에서 Postman 등으로 API 테스트 시 편리)
-        http.csrf(csrf -> csrf.disable());
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // CSRF 비활성화
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/css/**", "/js/**", "/oauth2/**", "/login/oauth2/**", "/api/users/refresh", "/dashboard").permitAll()
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // JWT를 통한 인증/인가를 위해 세션을 Stateless로 설정
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
+            )
+            .logout(logout -> logout.logoutSuccessUrl("/"))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
         return http.build();
     }
