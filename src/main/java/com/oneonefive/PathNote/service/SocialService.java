@@ -1,5 +1,6 @@
 package com.oneonefive.PathNote.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -8,14 +9,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.oneonefive.PathNote.dto.CommentDTO;
+import com.oneonefive.PathNote.dto.CommentRequestDTO;
 import com.oneonefive.PathNote.entity.Comment;
+import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.Like;
+import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.repository.CommentRepository;
+import com.oneonefive.PathNote.repository.CourseRepository;
 import com.oneonefive.PathNote.repository.LikeRepository;
+import com.oneonefive.PathNote.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class SocialService {
     
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private CommentRepository commentRepository;
     
@@ -50,7 +64,14 @@ public class SocialService {
     }
 
     // 댓글 등록
-    public Comment createComment(Comment comment) {
+    public Comment createComment(CommentRequestDTO commentRequestDTO) {
+        Course course = courseRepository.findById(commentRequestDTO.getCourse_id()).orElse(null);
+        User user = userRepository.findById(commentRequestDTO.getUser_id()).orElse(null);
+
+        Comment comment = new Comment();
+        comment.setContent(commentRequestDTO.getContent());
+        comment.setCourse(course);
+        comment.setUser(user);
         return commentRepository.save(comment);
     }
 
@@ -58,14 +79,25 @@ public class SocialService {
     public void deleteComment(Long comment_id) {
         commentRepository.deleteById(comment_id);
     }
-
+    
     // 좋아요 등록
+    @Transactional
     public Like createLike(Like like) {
+        Course course = like.getCourse();
+        course.setLikeCount(course.getLikeCount() + 1);
+        courseRepository.save(course);
         return likeRepository.save(like);
     }
 
     // 좋아요 삭제
+    @Transactional
     public void deleteLike(Long like_id) {
-        likeRepository.deleteById(like_id);
+        Like like = likeRepository.findById(like_id).orElse(null);
+        if (like != null) {
+            Course course = like.getCourse();
+            course.setLikeCount(course.getLikeCount() - 1);
+            courseRepository.save(course);
+            likeRepository.deleteById(like_id);
+        }
     }
 }

@@ -2,6 +2,8 @@ package com.oneonefive.PathNote.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,5 +49,6 @@ public class Comment {
 
     // 생성 시간
     // 댓글을 등록한 시간
+    @CreationTimestamp
     private LocalDateTime createdAt;
 }

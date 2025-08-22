@@ -30,6 +30,9 @@ public class Course {
     @Column(name = "course_id")
     private Long courseId;
 
+    
+    private Long userId;
+
     // 코스 이름
     private String course_name;
     // 코스 설명
@@ -40,6 +43,9 @@ public class Course {
     // 코스 생성 시간
     @CreationTimestamp
     private LocalDateTime created_at;
+
+    // 좋아요 갯수 (트랜잭션으로 관리할 것)
+    private Long likeCount;
 
     // 코스-장소 리스트
     @OneToMany(mappedBy = "course")

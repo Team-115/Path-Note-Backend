@@ -34,6 +34,7 @@ public class CourseService {
             course.getCourse_description(),
             course.getCourse_category(),
             course.getCreated_at(),
+            course.getLikeCount(),
             new ArrayList<>()
         );
 

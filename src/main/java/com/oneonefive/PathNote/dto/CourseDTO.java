@@ -23,6 +23,8 @@ public class CourseDTO {
     private String course_category;
     // 코스 생성 시간
     private LocalDateTime created_at;
+    // 좋아요 갯수
+    private Long likeCount;
     // 코스-장소 리스트
     private List<CoursePlaceDTO> coursePlaces;
 }
