@@ -1,6 +1,7 @@
 package com.oneonefive.PathNote.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public class SocialService {
                 commentDTOList.add(commentDTO);
         }
         
+        // DTO 리스트 날짜순으로 정렬
+        commentDTOList.sort(Comparator.comparing(CommentDTO::getCreated_at).reversed());
         // DTO 리스트 반환
         return commentDTOList;
     }
