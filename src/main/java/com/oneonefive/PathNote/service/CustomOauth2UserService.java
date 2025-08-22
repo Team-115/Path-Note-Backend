@@ -14,12 +14,14 @@ import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.oauth.KakaoOAuth2UserInfo;
 import com.oneonefive.PathNote.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Collections;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
@@ -53,15 +55,20 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     null,
                     userInfo.getKakaoId(),
                     userInfo.getNickname(),
+                    "A01",
                     LocalDateTime.now()
             );
         }
 
         userRepository.save(user);
 
+        // JWT 토큰 생성을 위해 User 객체를 attributes에 추가 (수정 가능한 새 Map 생성)
+        Map<String, Object> modifiableAttributes = new java.util.HashMap<>(attributes);
+        modifiableAttributes.put("user", user);
+
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                attributes,
+                modifiableAttributes,
                 "id"
         );
     }

@@ -25,10 +25,20 @@ public class User {
     @Column(nullable = false)
     private String nickname;
 
+    @Column(name = "profile_preset", nullable = false)
+    private String profilePreset;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // 업데이트용 메서드
+    // 닉네임, 프로필 업데이트 메서드
+    public User update(String nickname, String profilePreset) {
+        this.nickname = nickname;
+        this.profilePreset = profilePreset;
+        return this;
+    }
+
+    // 닉네임 업데이트 메서드
     public User update(String nickname) {
         this.nickname = nickname;
         return this;

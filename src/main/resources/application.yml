@@ -10,7 +10,7 @@ spring:
     url: jdbc:mysql://localhost:3306/pathnote?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: pathnote_user
-    password: pathnote1234
+    password: 12345
   
   jpa:
     hibernate:
