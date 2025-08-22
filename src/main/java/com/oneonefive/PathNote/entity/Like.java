@@ -44,5 +44,6 @@ public class Like {
 
     // 생성 시간
     // 좋아요를 누른 시간
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

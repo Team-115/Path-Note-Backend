@@ -3,10 +3,10 @@ package com.oneonefive.PathNote.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -15,22 +15,28 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "users")
 public class User {
+    
+    // 회원 ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "kakao_id", nullable = false)
+    // 카카오톡 ID
+    @Column(name = "kakao_id")
     private String kakaoId;
-    
-    @Column(nullable = false)
+  
+    // 닉네임
+    @Column(name = "nickname")
     private String nickname;
-
-    @Column(name = "profile_preset", nullable = false)
-    private String profilePreset;
-
-    @Column(nullable = false)
+  
+    // 계정 생성 시간
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+  
+    // 프로필 이미지
+    @Column(name = "profile_preset")
+    private String profilePreset;
 
     // 닉네임, 프로필 업데이트 메서드
     public User update(String nickname, String profilePreset) {

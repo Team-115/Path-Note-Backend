@@ -45,10 +45,12 @@ public class Comment {
     private User user;
 
     // 내용
+    @Column(name = "content")
     private String content;
 
     // 생성 시간
     // 댓글을 등록한 시간
     @CreationTimestamp
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

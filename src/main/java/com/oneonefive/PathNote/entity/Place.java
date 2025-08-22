@@ -24,15 +24,21 @@ public class Place {
     @Column(name = "place_id")
     private Long place_id;
     // T MAP POI ID
-    private Long poi_id;
+    @Column(name = "poi_id")
+    private Long poiId;
     // 장소 이름
-    private String place_name;
+    @Column(name = "place_name")
+    private String placeName;
     // 장소 카테고리
-    private String place_category;
+    @Column(name = "place_category")
+    private String placeCategory;
     // 장소 주소
-    private String place_address;
+    @Column(name = "place_address")
+    private String placeAddress;
     // 장소 X좌표
-    private Double place_coordinate_x;
+    @Column(name = "place_coordinate_x")
+    private Double placeCoordinateX;
     // 장소 Y좌표
-    private Double place_coordinate_y;
+    @Column(name = "place_coordinate_y")
+    private Double placeCoordinateY;
 }
