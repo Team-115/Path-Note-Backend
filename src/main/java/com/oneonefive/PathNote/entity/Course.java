@@ -46,7 +46,7 @@ public class Course {
 
     // 코스 생성 시간
     @CreationTimestamp
-    @Column(name = "created_ad")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     // 좋아요 갯수 (트랜잭션으로 관리할 것)
