@@ -40,7 +40,7 @@ public class CommentController {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setContent(createdComment.getContent());
         commentDTO.setCourse_id(createdComment.getCourse().getCourseId());
-        commentDTO.setUser_id(createdComment.getUser().getUser_id());
+        commentDTO.setUser_id(createdComment.getUser().getUserId());
         return commentDTO;
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
-import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.service.CourseService;
 
 import lombok.RequiredArgsConstructor;

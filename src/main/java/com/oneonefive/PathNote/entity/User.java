@@ -25,15 +25,19 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long user_id;
+    private Long userId;
 
     // 카카오톡 ID
-    private String kakao_id;
+    @Column(name = "kakao_id")
+    private String kakaoId;
     // 닉네임
+    @Column(name = "nickname")
     private String nickname;
     // 계정 생성 시간
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     // 프로필 이미지
-    private String profile_preset;
+    @Column(name = "profile_preset")
+    private String profilePreset;
 
 }

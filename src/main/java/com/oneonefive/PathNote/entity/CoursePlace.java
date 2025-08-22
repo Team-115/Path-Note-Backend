@@ -27,7 +27,7 @@ public class CoursePlace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "courseplace_id")
-    private Long courseplace_id;
+    private Long courseplaceId;
 
     // 코스 외래키
     // 코스 테이블에서 1개의 데이터를 바라보기 때문에 ManyToOne
@@ -42,10 +42,13 @@ public class CoursePlace {
     private Place place;
 
     // 코스 내에서의 순번
-    private Long sequence_index;
+    @Column(name = "sequence_index")
+    private Long sequenceIndex;
 
     // 장소 출발 시간
-    private LocalDateTime leave_time;
+    @Column(name = "leave_time")
+    private LocalDateTime leaveTime;
     // 장소 도착 시간
-    private LocalDateTime enter_time;
+    @Column(name = "enter_time")
+    private LocalDateTime enterTime;
 }

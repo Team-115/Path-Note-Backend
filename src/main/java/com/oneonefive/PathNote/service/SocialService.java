@@ -37,6 +37,7 @@ public class SocialService {
 
     // 댓글 전체 조회 (course_id)
     // 코스 단일 조회시 해당 코스에 대한 모든 댓글 조회
+    @Transactional
     public List<CommentDTO> getComments(Long courseId) {
 
         // 레포지토리에서 course_id가 조회한 코스의 id값과 동일한 모든 데이터를 조회
@@ -49,7 +50,7 @@ public class SocialService {
             CommentDTO commentDTO = new CommentDTO(
                     comment.getCommentId(),
                     comment.getCourse().getCourseId(),
-                    comment.getUser().getUser_id(),
+                    comment.getUser().getUserId(),
                     comment.getContent(),
                     comment.getCreatedAt()
                     );
@@ -63,6 +64,7 @@ public class SocialService {
     }
 
     // 댓글 등록
+    @Transactional
     public Comment createComment(CommentRequestDTO commentRequestDTO) {
         Course course = courseRepository.findById(commentRequestDTO.getCourse_id()).orElse(null);
         User user = userRepository.findById(commentRequestDTO.getUser_id()).orElse(null);
@@ -75,6 +77,7 @@ public class SocialService {
     }
 
     // 댓글 삭제
+    @Transactional
     public void deleteComment(Long comment_id) {
         commentRepository.deleteById(comment_id);
     }
