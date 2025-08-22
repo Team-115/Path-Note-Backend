@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
+import com.oneonefive.PathNote.dto.CourseRequestDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.service.CourseService;
 
@@ -55,9 +56,9 @@ public class CourseController {
     // 코스 신규 등록
     // 코스 완성 후 업로드 시 등록
     @PostMapping
-    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
-        Course createdCourse = courseService.createCourse(course);
-        return new ResponseEntity<>(createdCourse, HttpStatus.OK);
+    public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseRequestDTO courseRequestDTO) {
+        CourseDTO courseDTO = courseService.createCourse(courseRequestDTO);
+        return new ResponseEntity<>(courseDTO, HttpStatus.OK);
     }
 
     // DELETE /api/courses/{course_id}

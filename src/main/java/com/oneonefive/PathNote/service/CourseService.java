@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceDTO;
+import com.oneonefive.PathNote.dto.CourseRequestDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
 import com.oneonefive.PathNote.repository.CourseRepository;
@@ -70,8 +71,21 @@ public class CourseService {
     }
 
     // 코스 생성
-    public Course createCourse(Course course) {
-        return courseRepository.save(course);
+    public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
+        Course createdCourse = new Course();
+        createdCourse.setCourse_name(courseRequestDTO.getCourse_name());
+        createdCourse.setCourse_description(courseRequestDTO.getCourse_description());
+        createdCourse.setCourse_category(courseRequestDTO.getCourse_category());
+
+        courseRepository.save(createdCourse);
+
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourse_name(createdCourse.getCourse_name());
+        courseDTO.setCourse_description(createdCourse.getCourse_description());
+        courseDTO.setCourse_category(createdCourse.getCourse_category());
+        
+        // 코스 DTO 반환
+        return courseDTO;
     }
 
     // 코스 제거
