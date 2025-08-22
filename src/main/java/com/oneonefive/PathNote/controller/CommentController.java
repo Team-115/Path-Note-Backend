@@ -18,7 +18,7 @@ import com.oneonefive.PathNote.service.SocialService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 public class CommentController {
 
@@ -27,14 +27,14 @@ public class CommentController {
 
     // GET /api/comments/{course_id}
     // course_id에 해당하는 게시물의 댓글 전체 조회
-    @GetMapping("/{course_id}")
+    @GetMapping("/{course_id}/comments")
     public List<CommentDTO> getAllCourses(@PathVariable("course_id") Long course_id) {
         return socialService.getComments(course_id);
     }
 
     // POST /api/comments/{course_id}
     // course_id에 해당하는 게시물에 댓글 신규 등록
-    @PostMapping("/{course_id}")
+    @PostMapping("/{course_id}/comments")
     public CommentDTO createComment(@PathVariable("course_id") Long course_id, @RequestBody CommentRequestDTO comment) {
         Comment createdComment = socialService.createComment(comment);
         CommentDTO commentDTO = new CommentDTO();
