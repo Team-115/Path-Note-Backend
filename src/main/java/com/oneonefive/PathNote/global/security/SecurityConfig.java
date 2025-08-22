@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // JWT를 통한 인증/인가를 위해 세션을 Stateless로 설정
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // JWT를 통한 인증/인가를 위해 세션을 Stateless로 설정
             )
             .oauth2Login(oauth2 -> oauth2
                 .successHandler(oAuth2AuthenticationSuccessHandler)

@@ -35,7 +35,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         // String registrationId = userRequest.getClientRegistration().getRegistrationId();
         Map<String, Object> attributes = oAuth2User.getAttributes();
-
+        log.info("Kakao OAuth2 User Attributes: {}", attributes);
 
         return processKakaoUser(attributes);
     }
