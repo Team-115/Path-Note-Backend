@@ -28,7 +28,7 @@ public class CommentController {
     // GET /api/comments/{course_id}
     // course_id에 해당하는 게시물의 댓글 전체 조회
     @GetMapping("/{course_id}/comments")
-    public List<CommentDTO> getAllCourses(@PathVariable("course_id") Long course_id) {
+    public List<CommentDTO> getAllComments(@PathVariable("course_id") Long course_id) {
         return socialService.getComments(course_id);
     }
 
