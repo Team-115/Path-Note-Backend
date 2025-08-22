@@ -38,7 +38,7 @@ public class Course {
     @Column(name = "course_name")
     private String courseName;
     // 코스 설명
-    @Column(name = "course_descriptioin")
+    @Column(name = "course_description")
     private String courseDescription;
     // 코스 카테고리
     @Column(name = "course_category")
