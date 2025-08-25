@@ -11,7 +11,9 @@ import com.oneonefive.PathNote.dto.CoursePlaceDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
+import com.oneonefive.PathNote.repository.CoursePlaceRepository;
 import com.oneonefive.PathNote.repository.CourseRepository;
+import com.oneonefive.PathNote.repository.PlaceRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -20,6 +22,12 @@ public class CourseService {
     
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private PlaceRepository placeRepository;
+
+    @Autowired
+    private CoursePlaceRepository coursePlaceRepository;
 
     // 코스 전체 조회
     @Transactional
@@ -35,11 +43,6 @@ public class CourseService {
                 CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                     coursePlace.getPlace().getPoiId(),
                     coursePlace.getSequenceIndex(),
-                    coursePlace.getPlace().getPlaceName(),
-                    coursePlace.getPlace().getPlaceCategory(),
-                    coursePlace.getPlace().getPlaceAddress(),
-                    coursePlace.getPlace().getPlaceCoordinateX(),
-                    coursePlace.getPlace().getPlaceCoordinateY(),
                     coursePlace.getEnterTime(),
                     coursePlace.getLeaveTime()
                     );
@@ -89,11 +92,6 @@ public class CourseService {
             CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                 coursePlace.getPlace().getPoiId(),
                 coursePlace.getSequenceIndex(),
-                coursePlace.getPlace().getPlaceName(),
-                coursePlace.getPlace().getPlaceCategory(),
-                coursePlace.getPlace().getPlaceAddress(),
-                coursePlace.getPlace().getPlaceCoordinateX(),
-                coursePlace.getPlace().getPlaceCoordinateY(),
                 coursePlace.getEnterTime(),
                 coursePlace.getLeaveTime()
                 );
@@ -109,32 +107,45 @@ public class CourseService {
     // 코스 생성
     @Transactional
     public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
+
+        // 코스 데이터 생성
         Course course = new Course();
         course.setUserId(courseRequestDTO.getUser_id());
         course.setCourseName(courseRequestDTO.getCourse_name());
         course.setCourseDescription(courseRequestDTO.getCourse_description());
         course.setCourseCategory(courseRequestDTO.getCourse_category());
-        List<CoursePlace> coursePlaces = new ArrayList<>();
-        course.setCoursePlaces(coursePlaces);
 
+        // 코스 저장
         course = courseRepository.save(course);
+
+        // 코스-장소 데이터 생성
+        List<CoursePlace> coursePlaces = new ArrayList<>();
+        for (CoursePlaceDTO coursePlace : courseRequestDTO.getCourse_places()) {
+            CoursePlace createdCoursePlace = new CoursePlace();
+            createdCoursePlace.setCourse(course);
+            createdCoursePlace.setPlace(placeRepository.findByPoiId(coursePlace.getPoi_id()));
+            createdCoursePlace.setSequenceIndex(coursePlace.getSequence_index());
+            createdCoursePlace.setEnterTime(coursePlace.getPlace_enter_time());
+            createdCoursePlace.setLeaveTime(coursePlace.getPlace_leave_time());
+            coursePlaces.add(createdCoursePlace);
+        }
+
+        // 코스-장소 저장
+        coursePlaces = coursePlaceRepository.saveAll(coursePlaces);
+        
         // 코스-장소 DTO 리스트 생성
         List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
-        for (CoursePlace coursePlace : course.getCoursePlaces()) {
+        for (CoursePlace coursePlace : coursePlaces) {
             CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                 coursePlace.getPlace().getPoiId(),
                 coursePlace.getSequenceIndex(),
-                coursePlace.getPlace().getPlaceName(),
-                coursePlace.getPlace().getPlaceCategory(),
-                coursePlace.getPlace().getPlaceAddress(),
-                coursePlace.getPlace().getPlaceCoordinateX(),
-                coursePlace.getPlace().getPlaceCoordinateY(),
                 coursePlace.getEnterTime(),
                 coursePlace.getLeaveTime()
                 );
             coursePlaceDTOs.add(coursePlaceDTO);
         }
 
+        // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
         courseDTO.setCourse_name(course.getCourseName());
