@@ -3,6 +3,8 @@ package com.oneonefive.PathNote.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,7 @@ public class CourseDTO {
     // 코스 카테고리
     private String course_category;
     // 코스 생성 시간
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime created_at;
     // 좋아요 갯수
     private Long like_Count;
