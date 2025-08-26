@@ -34,13 +34,18 @@ public class CourseService {
     // 코스 전체 조회
     @Transactional
     public List<CourseDTO> findCourseAll() {
+
+        // 레포지토리를 통해 모든 코스 데이터를 엔티티로 조회
         List<Course> courses = courseRepository.findAll();
+
+        // (코스 DTO 리스트) 생성
         List<CourseDTO> courseDTOs = new ArrayList<>();
 
         for (Course course : courses) {
 
             // (코스-장소 DTO 리스트) 생성
             List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
+            // 코스와 연관관계가 맺어져있는 CoursePlace를 CoursePlaceDTO로 변환 후 (코스-장소 DTO 리스트)에 저장
             for (CoursePlace coursePlace : course.getCoursePlaces()) {
                 CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                     coursePlace.getPlace().getPoiId(),
@@ -54,11 +59,13 @@ public class CourseService {
             // (코스 DTO) 생성
             CourseDTO courseDTO = new CourseDTO(
                 course.getCourseId(),
+                course.getUserId(),
                 course.getCourseName(),
                 course.getCourseDescription(),
                 course.getCourseCategory(),
                 course.getCreatedAt(),
                 course.getLikeCount(),
+                // (코스-장소 DTO 리스트) 삽입
                 coursePlaceDTOs
             );
 
@@ -78,6 +85,7 @@ public class CourseService {
         Course course = courseRepository.findById(course_id).orElse(null);
         CourseDTO courseDTO = new CourseDTO(
             course.getCourseId(),
+            course.getUserId(),
             course.getCourseName(),
             course.getCourseDescription(),
             course.getCourseCategory(),

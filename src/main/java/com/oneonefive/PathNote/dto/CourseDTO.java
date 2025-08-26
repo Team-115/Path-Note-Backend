@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 public class CourseDTO {
     // 코스 ID
     private Long course_id;
+    // 회원 ID
+    private Long user_id;
     // 코스 이름
     private String course_name;
     // 코스 설명
