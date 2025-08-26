@@ -14,9 +14,20 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseRequestDTO {
+
+    // 회원 ID
     private Long user_id;
+    
+    // 코스 이름
     private String course_name;
+
+    // 코스 설명
     private String course_description;
+
+    // 코스 카테고리
     private String course_category;
-    private List<CoursePlaceDTO> course_places = new ArrayList();
+
+    // 코스-장소 리스트
+    private List<CoursePlaceRequestDTO> course_places = new ArrayList();
+
 }

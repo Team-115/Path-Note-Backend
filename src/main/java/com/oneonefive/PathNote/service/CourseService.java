@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceDTO;
+import com.oneonefive.PathNote.dto.CoursePlaceRequestDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
+import com.oneonefive.PathNote.entity.Place;
 import com.oneonefive.PathNote.repository.CoursePlaceRepository;
 import com.oneonefive.PathNote.repository.CourseRepository;
 import com.oneonefive.PathNote.repository.PlaceRepository;
@@ -107,6 +109,18 @@ public class CourseService {
     // 코스 생성
     @Transactional
     public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
+        for (CoursePlaceRequestDTO coursePlace : courseRequestDTO.getCourse_places()) {
+            if (placeRepository.findByPoiId(coursePlace.getPoi_id()) == null) {
+                Place newPlace = new Place();
+                newPlace.setPoiId(coursePlace.getPoi_id());
+                newPlace.setPlaceName(coursePlace.getPlace_name());
+                newPlace.setPlaceCategory(coursePlace.getPlace_category());
+                newPlace.setPlaceAddress(coursePlace.getPlace_address());
+                newPlace.setPlaceCoordinateX(coursePlace.getPlace_coordinate_x());
+                newPlace.setPlaceCoordinateY(coursePlace.getPlace_coordinate_y());
+                placeRepository.save(newPlace);
+            }
+        }
 
         // 코스 데이터 생성
         Course course = new Course();
@@ -120,7 +134,7 @@ public class CourseService {
 
         // 코스-장소 데이터 생성
         List<CoursePlace> coursePlaces = new ArrayList<>();
-        for (CoursePlaceDTO coursePlace : courseRequestDTO.getCourse_places()) {
+        for (CoursePlaceRequestDTO coursePlace : courseRequestDTO.getCourse_places()) {
             CoursePlace createdCoursePlace = new CoursePlace();
             createdCoursePlace.setCourse(course);
             createdCoursePlace.setPlace(placeRepository.findByPoiId(coursePlace.getPoi_id()));
