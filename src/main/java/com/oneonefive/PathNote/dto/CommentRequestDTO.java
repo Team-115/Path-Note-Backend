@@ -15,10 +15,20 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentRequestDTO {
+    
+    // 댓글 ID
     private Long comment_id;
+
+    // 코스 ID
     private Long course_id;
+
+    // 회원 ID
     private Long user_id;
+
+    // 댓글 내용
     private String content;
+
+    // 생성 시간
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime created_at;
 }
