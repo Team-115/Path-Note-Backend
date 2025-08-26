@@ -117,6 +117,9 @@ public class CourseService {
     // 코스 생성
     @Transactional
     public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
+
+        // 장소 레포지토리를 통해 poi_id를 조회하여 장소 데이터가 있는지 확인
+        // 없다면 CoursePlaceRequestDTO에 포함된 내용을 토대로 새로운 장소 데이터 생성
         for (CoursePlaceRequestDTO coursePlace : courseRequestDTO.getCourse_places()) {
             if (placeRepository.findByPoiId(coursePlace.getPoi_id()) == null) {
                 Place newPlace = new Place();
@@ -182,6 +185,7 @@ public class CourseService {
     }
 
     // 코스 제거
+    // 코스-장소 리스트 필드의 Cascade 옵션을 통해 관련 데이터도 함께 제거됨
     @Transactional
     public void deleteCourseById(Long course_id) {
         courseRepository.deleteById(course_id);
