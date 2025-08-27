@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
@@ -31,8 +33,18 @@ public class CourseController {
     // 코스 전체 조회
     // 코스 페이지 열람시 우측 컴포넌트에 표시
     @GetMapping
-    public List<CourseDTO> getAllCourses() {
-        return courseService.findCourseAll();
+    public ResponseEntity<List<CourseDTO>> getAllCourses(
+        @RequestParam(name = "region", required = false) String region,
+        @RequestParam(name = "category", required = false) String category) {
+        List<CourseDTO> courseDTOs = courseService.findCourseAll(region, category);
+        
+        if (courseDTOs == null || courseDTOs.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        else {
+            return new ResponseEntity<>(courseDTOs, HttpStatus.OK);
+        }
+
     }
 
     // GET /api/courses/{course_id}
@@ -45,8 +57,7 @@ public class CourseController {
         if (courseDTO != null) {
             return new ResponseEntity<>(courseDTO, HttpStatus.OK);
         }
-        else
-        {
+        else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -57,6 +68,14 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseRequestDTO courseRequestDTO) {
         CourseDTO courseDTO = courseService.createCourse(courseRequestDTO);
+        return new ResponseEntity<>(courseDTO, HttpStatus.OK);
+    }
+
+    // PUT /api/courses/{course_id}
+    // 코스 수정
+    @PutMapping("/{course_id}")
+    public ResponseEntity<CourseDTO> editCourseById(@PathVariable Long course_id, @RequestBody CourseRequestDTO courseRequestDTO) {
+        CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
         return new ResponseEntity<>(courseDTO, HttpStatus.OK);
     }
 
