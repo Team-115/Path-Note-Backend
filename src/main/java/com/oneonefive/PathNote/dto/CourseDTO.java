@@ -36,8 +36,8 @@ public class CourseDTO {
     private LocalDateTime created_at;
 
     // 좋아요 갯수
-    private Long like_Count;
+    private Long like_count;
     
     // 코스-장소 리스트
-    private List<CoursePlaceDTO> course_Places;
+    private List<CoursePlaceDTO> course_places;
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +58,14 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseRequestDTO courseRequestDTO) {
         CourseDTO courseDTO = courseService.createCourse(courseRequestDTO);
+        return new ResponseEntity<>(courseDTO, HttpStatus.OK);
+    }
+
+    // PUT /api/courses/{course_id}
+    // 코스 수정
+    @PutMapping("/{course_id}")
+    public ResponseEntity<CourseDTO> editCourseById(@PathVariable Long course_id, @RequestBody CourseRequestDTO courseRequestDTO) {
+        CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
         return new ResponseEntity<>(courseDTO, HttpStatus.OK);
     }
 

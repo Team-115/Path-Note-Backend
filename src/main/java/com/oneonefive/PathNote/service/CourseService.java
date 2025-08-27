@@ -1,5 +1,6 @@
 package com.oneonefive.PathNote.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,7 +110,7 @@ public class CourseService {
         }
 
         // 코스 DTO에 코스-장소 DTO 리스트 저장
-        courseDTO.setCourse_Places(coursePlaceDTOs);
+        courseDTO.setCourse_places(coursePlaceDTOs);
         return courseDTO;
 
     }
@@ -177,10 +178,68 @@ public class CourseService {
         courseDTO.setCourse_description(course.getCourseDescription());
         courseDTO.setCourse_category(course.getCourseCategory());
         courseDTO.setCreated_at(course.getCreatedAt());
-        courseDTO.setLike_Count(course.getLikeCount());
-        courseDTO.setCourse_Places(coursePlaceDTOs);
+        courseDTO.setLike_count(course.getLikeCount());
+        courseDTO.setCourse_places(coursePlaceDTOs);
         
         // 코스 DTO 반환
+        return courseDTO;
+    }
+
+    // 코스 수정
+    @Transactional
+    public CourseDTO editCourse(Long course_id, CourseRequestDTO courseRequestDTO) {
+        
+        // 코스 엔티티 조회
+        Course course = courseRepository.findById(course_id).orElse(null);
+
+        // 기존 코스-장소 제거
+        course.getCoursePlaces().clear();
+
+        // 코스-장소 데이터 생성
+        List<CoursePlace> coursePlaces = new ArrayList<>();
+        for (CoursePlaceRequestDTO coursePlace : courseRequestDTO.getCourse_places()) {
+            CoursePlace createdCoursePlace = new CoursePlace();
+            createdCoursePlace.setCourse(course);
+            createdCoursePlace.setPlace(placeRepository.findByPoiId(coursePlace.getPoi_id()));
+            createdCoursePlace.setSequenceIndex(coursePlace.getSequence_index());
+            createdCoursePlace.setEnterTime(coursePlace.getPlace_enter_time());
+            createdCoursePlace.setLeaveTime(coursePlace.getPlace_leave_time());
+            coursePlaces.add(createdCoursePlace);
+        }
+
+        // 코스 필드 수정
+        course.setCourseName(courseRequestDTO.getCourse_name());
+        course.setCourseCategory(courseRequestDTO.getCourse_category());
+        course.setCourseDescription(courseRequestDTO.getCourse_description());
+        course.setCreatedAt(LocalDateTime.now());
+        course.getCoursePlaces().addAll(coursePlaces);
+
+        // 코스 저장
+        course = courseRepository.save(course);
+
+        // 코스-장소 DTO 리스트 생성
+        List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
+        for (CoursePlace coursePlace : coursePlaces) {
+            CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
+                coursePlace.getPlace().getPoiId(),
+                coursePlace.getSequenceIndex(),
+                coursePlace.getEnterTime(),
+                coursePlace.getLeaveTime()
+                );
+            coursePlaceDTOs.add(coursePlaceDTO);
+        }
+
+        // 코스 DTO 생성
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourse_id(course.getCourseId());
+        courseDTO.setUser_id(course.getUserId());
+        courseDTO.setCourse_name(course.getCourseName());
+        courseDTO.setCourse_description(course.getCourseDescription());
+        courseDTO.setCourse_category(course.getCourseCategory());
+        courseDTO.setCreated_at(course.getCreatedAt());
+        courseDTO.setLike_count(course.getLikeCount());
+        courseDTO.setCourse_places(coursePlaceDTOs);
+
         return courseDTO;
     }
 
