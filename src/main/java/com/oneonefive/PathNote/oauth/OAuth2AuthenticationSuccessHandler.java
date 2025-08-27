@@ -35,7 +35,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             
             // 프론트엔드로 토큰과 함께 리다이렉트
             String redirectUrl = String.format(
-                "http://localhost:8080/dashboard?accessToken=%s&refreshToken=%s", 
+                "http://localhost:5173/?accessToken=%s&refreshToken=%s",
                 accessToken, 
                 refreshToken
             );
@@ -45,7 +45,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             log.info("JWT 토큰 발급 완료 - 사용자: {}", user.getNickname());
         } else {
             // 에러 시에도 리다이렉트
-            String errorRedirectUrl = "http://localhost:3000/auth/error?message=사용자 정보를 찾을 수 없습니다.";
+            String errorRedirectUrl = "http://localhost:5173/auth/error?message=사용자 정보를 찾을 수 없습니다.";
             getRedirectStrategy().sendRedirect(request, response, errorRedirectUrl);
         }
     }

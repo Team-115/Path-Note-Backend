@@ -12,6 +12,8 @@ import com.oneonefive.PathNote.service.CustomOauth2UserService;
 import com.oneonefive.PathNote.filter.JwtAuthenticationFilter;
 import com.oneonefive.PathNote.oauth.OAuth2AuthenticationSuccessHandler;
 
+import org.springframework.web.cors.CorsConfigurationSource;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -22,10 +24,12 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable()) // CSRF 비활성화
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/css/**", "/js/**", "/oauth2/**", "/login/oauth2/**", "/api/users/refresh", "/dashboard").permitAll()
