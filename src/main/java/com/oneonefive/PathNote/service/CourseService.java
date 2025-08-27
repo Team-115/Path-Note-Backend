@@ -34,10 +34,26 @@ public class CourseService {
 
     // 코스 전체 조회
     @Transactional
-    public List<CourseDTO> findCourseAll() {
+    public List<CourseDTO> findCourseAll(String region, String category) {
 
-        // 레포지토리를 통해 모든 코스 데이터를 엔티티로 조회
-        List<Course> courses = courseRepository.findAll();
+        List<Course> courses;
+
+        // region과 category가 모두 있으면 
+        if (region != null && category != null) {
+            courses = courseRepository.findByPlaceAddressStartingWithAndCourseCategory(region, category);
+        } 
+        // region만 있을 경우
+        else if (region != null) {
+            courses = courseRepository.findByPlaceAddressStartingWith(region);
+        }
+        // category 있을 경우 (키워드 검색은 코스명이나 설명, 태그 등에서 검색할 수 있습니다)
+        else if (category != null) {
+            courses = courseRepository.findByCourseCategory(category);
+        }
+        // region과 category 모두 없을
+        else {
+            courses = courseRepository.findAll();
+        }
 
         // (코스 DTO 리스트) 생성
         List<CourseDTO> courseDTOs = new ArrayList<>();
