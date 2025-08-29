@@ -65,11 +65,16 @@ public class CourseService {
             // 코스와 연관관계가 맺어져있는 CoursePlace를 CoursePlaceDTO로 변환 후 (코스-장소 DTO 리스트)에 저장
             for (CoursePlace coursePlace : course.getCoursePlaces()) {
                 CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
-                    coursePlace.getPlace().getPoiId(),
-                    coursePlace.getSequenceIndex(),
-                    coursePlace.getEnterTime(),
-                    coursePlace.getLeaveTime()
-                    );
+                coursePlace.getPlace().getPoiId(),
+                coursePlace.getSequenceIndex(),
+                coursePlace.getPlace().getPlaceName(),
+                coursePlace.getPlace().getPlaceCategory(),
+                coursePlace.getPlace().getPlaceAddress(),
+                coursePlace.getPlace().getPlaceCoordinateX(),
+                coursePlace.getPlace().getPlaceCoordinateY(),
+                coursePlace.getEnterTime(),
+                coursePlace.getLeaveTime()
+                );
                 coursePlaceDTOs.add(coursePlaceDTO);
             }
 
@@ -119,6 +124,11 @@ public class CourseService {
             CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                 coursePlace.getPlace().getPoiId(),
                 coursePlace.getSequenceIndex(),
+                coursePlace.getPlace().getPlaceName(),
+                coursePlace.getPlace().getPlaceCategory(),
+                coursePlace.getPlace().getPlaceAddress(),
+                coursePlace.getPlace().getPlaceCoordinateX(),
+                coursePlace.getPlace().getPlaceCoordinateY(),
                 coursePlace.getEnterTime(),
                 coursePlace.getLeaveTime()
                 );
@@ -181,6 +191,11 @@ public class CourseService {
             CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                 coursePlace.getPlace().getPoiId(),
                 coursePlace.getSequenceIndex(),
+                coursePlace.getPlace().getPlaceName(),
+                coursePlace.getPlace().getPlaceCategory(),
+                coursePlace.getPlace().getPlaceAddress(),
+                coursePlace.getPlace().getPlaceCoordinateX(),
+                coursePlace.getPlace().getPlaceCoordinateY(),
                 coursePlace.getEnterTime(),
                 coursePlace.getLeaveTime()
                 );
@@ -239,6 +254,11 @@ public class CourseService {
             CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
                 coursePlace.getPlace().getPoiId(),
                 coursePlace.getSequenceIndex(),
+                coursePlace.getPlace().getPlaceName(),
+                coursePlace.getPlace().getPlaceCategory(),
+                coursePlace.getPlace().getPlaceAddress(),
+                coursePlace.getPlace().getPlaceCoordinateX(),
+                coursePlace.getPlace().getPlaceCoordinateY(),
                 coursePlace.getEnterTime(),
                 coursePlace.getLeaveTime()
                 );
