@@ -160,5 +160,64 @@ public class CourseControllerTest {
             // 서비스 호출 인자까지 계약 검증
             then(courseService).should().findCourseAll(region, category);
         }
+
+        @Test
+        //given 결과가 비어있을 때 when 조회 then 404
+        void 코스_전체_조회_빈결과_404() throws Exception {
+            // given
+            given(courseService.findCourseAll(null, null)).willReturn(List.of());
+
+            // when & then
+            mockMvc.perform(get("/api/courses"))
+                    .andExpect(status().isNotFound());
+
+            then(courseService).should().findCourseAll(null, null);
+        }
     }
+
+    // GET /api/courses/{course_id} - 단건 조회
+    @Nested
+    @DisplayName("GET /api/courses/{course_id} - 단건 조회")
+    class GetOneCourse {
+
+        @Test
+        //given 존재하는 ID when 조회 then 200 + DTO 반환(중첩 포함)
+        void 코스_단건_조회_성공() throws Exception {
+            // given
+            long id = 10L;
+            CourseDTO dto = courseDto(id, "부산 여행 코스", "여행");
+            given(courseService.findCourseById(id)).willReturn(dto);
+
+            // when
+            MvcResult result = mockMvc.perform(get("/api/courses/{course_id}", id)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            // then
+            CourseDTO body = om.readValue(result.getResponse().getContentAsString(), CourseDTO.class);
+            assertThat(body.getCourse_id()).isEqualTo(id);
+            assertThat(body.getCourse_name()).isEqualTo("부산 여행 코스");
+            assertThat(body.getCourse_places()).hasSize(2);
+            assertThat(body.getCourse_places().get(1).getPlace_name()).isEqualTo("테스트 카페");
+            assertThat(body.getCourse_places().get(1).getPlace_leave_time().toString()).contains("2025-08-29T10:15");
+
+            then(courseService).should().findCourseById(id);
+        }
+
+        @Test
+        //given 존재하지 않는 ID when 조회 then 404
+        void 코스_단건_조회_404() throws Exception {
+            // given
+            long id = 999L;
+            given(courseService.findCourseById(id)).willReturn(null);
+
+            // when & then
+            mockMvc.perform(get("/api/courses/{course_id}", id))
+                    .andExpect(status().isNotFound());
+
+            then(courseService).should().findCourseById(id);
+        }
+    }
+
 }
