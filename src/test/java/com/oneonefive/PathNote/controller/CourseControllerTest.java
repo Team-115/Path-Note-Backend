@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")         // application-test.yml 사용
 @WebMvcTest(controllers = CourseController.class)
 @AutoConfigureMockMvc(addFilters = false) // 시큐리티 보안 필터 비활성화
+@DisplayName("코스 컨트롤러 테스트")
 public class CourseControllerTest {
 
     @Autowired
@@ -220,4 +221,45 @@ public class CourseControllerTest {
         }
     }
 
+    // POST /api/courses - 신규 등록
+    @Nested
+    @DisplayName("POST /api/courses - 신규 등록")
+    class CreateCourse {
+
+        @Test
+        //given 유효한 요청 when 생성 then 200 + 생성된 DTO 반환
+        void 코스_등록_성공() throws Exception {
+            // given
+            CourseRequestDTO req = courseReq("서울 빵투어", "맛집");
+            CourseDTO created = courseDto(101L, req.getCourse_name(), req.getCourse_category());
+            given(courseService.createCourse(any(CourseRequestDTO.class))).willReturn(created);
+
+            // when
+            MvcResult result = mockMvc.perform(post("/api/courses")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(req)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            // then: 응답 검증
+            CourseDTO body = om.readValue(result.getResponse().getContentAsString(), CourseDTO.class);
+            assertThat(body.getCourse_id()).isEqualTo(101L);
+            assertThat(body.getCourse_name()).isEqualTo("서울 빵투어");
+            assertThat(body.getCourse_category()).isEqualTo("맛집");
+            assertThat(body.getCreated_at().toString()).contains("2025-08-29T08:00");
+            assertThat(body.getCourse_places()).hasSize(2);
+
+            // then: 서비스 호출 인자(요청 바디) 캡쳐/검증
+            ArgumentCaptor<CourseRequestDTO> captor = ArgumentCaptor.forClass(CourseRequestDTO.class);
+            then(courseService).should().createCourse(captor.capture());
+            CourseRequestDTO passed = captor.getValue();
+
+            assertThat(passed.getUser_id()).isEqualTo(9001L);
+            assertThat(passed.getCourse_name()).isEqualTo("서울 빵투어");
+            assertThat(passed.getCourse_category()).isEqualTo("맛집");
+            assertThat(passed.getCourse_places()).hasSize(2);
+            assertThat(passed.getCourse_places().get(0).getPlace_name()).isEqualTo("대흥동 빵집");
+        }
+
+    }
 }
