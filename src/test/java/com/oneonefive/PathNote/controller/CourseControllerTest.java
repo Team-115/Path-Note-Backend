@@ -260,6 +260,76 @@ public class CourseControllerTest {
             assertThat(passed.getCourse_places()).hasSize(2);
             assertThat(passed.getCourse_places().get(0).getPlace_name()).isEqualTo("대흥동 빵집");
         }
+    }
 
+    // PUT /api/courses/{course_id} - 수정
+    @Nested
+    @DisplayName("PUT /api/courses/{course_id} - 수정")
+    class EditCourse {
+
+        @Test
+        //given 유효한 요청 when 수정 then 200 + 수정된 DTO 반환
+        void 코스_수정_성공() throws Exception {
+            // given
+            long id = 55L;
+            CourseRequestDTO req = courseReq("제주 올레 코스", "트레킹");
+            CourseDTO edited = courseDto(id, req.getCourse_name(), req.getCourse_category());
+            given(courseService.editCourse(eq(id), any(CourseRequestDTO.class))).willReturn(edited);
+
+            // when
+            MvcResult result = mockMvc.perform(put("/api/courses/{course_id}", id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(req)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            // then
+            CourseDTO body = om.readValue(result.getResponse().getContentAsString(), CourseDTO.class);
+            assertThat(body.getCourse_id()).isEqualTo(id);
+            assertThat(body.getCourse_name()).isEqualTo("제주 올레 코스");
+            assertThat(body.getCourse_category()).isEqualTo("트레킹");
+
+            // 테스트에서 직렬화(ObjectMapper)와 스프링의 역직렬화(ObjectMapper)가 달라서
+            // 변경: ArgumentCaptor + 재귀 비교
+            ArgumentCaptor<CourseRequestDTO> captor = ArgumentCaptor.forClass(CourseRequestDTO.class);
+            then(courseService).should().editCourse(eq(id), captor.capture());
+
+            CourseRequestDTO actual = captor.getValue();
+
+            // 필드가 완전히 같다면
+            assertThat(actual).usingRecursiveComparison().isEqualTo(req);
+        }
+    }
+
+    // DELETE /api/courses/{course_id} - 삭제
+    @Nested
+    @DisplayName("DELETE /api/courses/{course_id} - 삭제")
+    class DeleteCourse {
+
+        @Test
+        //given 존재하는 ID when 삭제 then 204
+        void 코스_삭제_성공() throws Exception {
+            // given
+            long id = 77L;
+            BDDMockito.willDoNothing().given(courseService).deleteCourseById(id);
+
+            // when & then
+            mockMvc.perform(delete("/api/courses/{course_id}", id))
+                    .andExpect(status().isNoContent());
+
+            then(courseService).should().deleteCourseById(id);
+        }
+
+        @Test
+        @DisplayName("given 숫자가 아닌 경로변수 when 삭제 then 400(Binding 실패) + 서비스 호출 없음")
+        void 코스_삭제_바인딩에러_400() throws Exception {
+            // given: 스텁 불필요
+
+            // when & then
+            mockMvc.perform(delete("/api/courses/{course_id}", "NaN"))
+                    .andExpect(status().isBadRequest());
+
+            then(courseService).should(never()).deleteCourseById(anyLong());
+        }
     }
 }
