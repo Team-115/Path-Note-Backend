@@ -25,23 +25,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 /**
  * CourseController 단위 테스트
- * @WebMvcTest로 MVC 레이어만 로드하고, Service는 @MockBean으로 대체
+ * @WebMvcTest: 컨트롤러 계층만 로드하여 빠르고 고립된 테스트 보장.
+ * @MockitoBean: Service를 Mockito 목으로 대체해서 "컨트롤러-서비스 계약"만 검증.
  * 각 테스트는 Given(환경/스텁) - When(행위) - Then(검증) 흐름을 주석으로 명확히 분리
  * HTTP Status Code, JSON 필드, 서비스 호출 여부/인자까지 모두 검증
+ * 응답 검증 두 방식: (a) jsonPath 체인으로 바로 매칭, (b) ObjectMapper로 역직렬화 후 AssertJ로 정교 비교.
+ * 인자 계약 검증: ArgumentCaptor로 컨트롤러가 서비스에 넘긴 파라미터까지 확인.
+ * 예외/빈결과 처리는 반드시 컨트롤러 구현(@ControllerAdvice 포함)과 합을 맞춰야 404/400 등이 일치함.
  */
 @ActiveProfiles("test")         // application-test.yml 사용
 @WebMvcTest(controllers = CourseController.class)
@@ -58,6 +58,8 @@ public class CourseControllerTest {
 
     // --------------------------------------------------
     // DTO들을 간결하게 생성하기 위한 헬퍼
+    // - 하드코딩된 시간/좌표 등은 "예측 가능한 고정 값"으로 테스트 안정성 확보
+    // - 공통적으로 쓰는 샘플을 함수화하여 중복 제거 + 의도(어떤 DTO인지) 명확화
     // --------------------------------------------------
     private CoursePlaceDTO placeDto(long seq, String name) {
         // 각 장소의 시간 포맷: "yyyy-MM-dd HH:mm"
@@ -120,6 +122,7 @@ public class CourseControllerTest {
 
 
     // GET /api/courses - 코스 전체 조회 (region/category 필터)
+    // 컨트롤러가 서비스에 "그대로" 파라미터를 전달하는지, 응답 형태/상태코드가 계약대로인지 확인.
     @Nested
     @DisplayName("GET /api/courses - 전체 조회")
     class GetAllCourses {
@@ -163,7 +166,7 @@ public class CourseControllerTest {
         }
 
         @Test
-        //given 결과가 비어있을 때 when 조회 then 404
+        //iven 결과가 비어있을 때 when 조회 then 404
         void 코스_전체_조회_빈결과_404() throws Exception {
             // given
             given(courseService.findCourseAll(null, null)).willReturn(List.of());
