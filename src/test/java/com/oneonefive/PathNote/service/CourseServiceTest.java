@@ -69,7 +69,6 @@ class CourseServiceTest {
         return c;
     }
 
-    // ---------- 테스트 ----------
     @Nested
     @DisplayName("findCourseAll")
     class FindCourseAll {
