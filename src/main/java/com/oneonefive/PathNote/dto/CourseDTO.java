@@ -40,4 +40,8 @@ public class CourseDTO {
     
     // 코스-장소 리스트
     private List<CoursePlaceDTO> course_places;
+
+    // 중심좌표
+    private Double center_x;
+    private Double center_y;
 }

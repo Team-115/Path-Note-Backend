@@ -58,4 +58,10 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoursePlace> coursePlaces;
 
+    // 중심 좌표
+    @Column(name = "center_x")
+    private Double centerX;
+    @Column(name = "center_y")
+    private Double centerY;
+
 }
