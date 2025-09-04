@@ -22,11 +22,11 @@ public class CommentDTO {
     // 댓글 ID
     private Long comment_id;
 
-    // 회원 ID
-    private UserDTO user;
-
     // 댓글 내용
     private String content;
+
+    // 댓글 작성자 정보
+    private UserDTO user;
 
     // 생성 시간
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
