@@ -88,7 +88,9 @@ public class CourseService {
                 course.getCreatedAt(),
                 course.getLikeCount(),
                 // (코스-장소 DTO 리스트) 삽입
-                coursePlaceDTOs
+                coursePlaceDTOs,
+                coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0),
+                coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0)
             );
 
             // (코스 DTO 리스트)에 (코스 DTO) 추가
@@ -113,7 +115,9 @@ public class CourseService {
             course.getCourseCategory(),
             course.getCreatedAt(),
             course.getLikeCount(),
-            new ArrayList<>()
+            new ArrayList<>(),
+            course.getCenterX(),
+            course.getCenterY()
         );
 
         // 코스-장소 DTO 리스트 생성
@@ -137,6 +141,8 @@ public class CourseService {
 
         // 코스 DTO에 코스-장소 DTO 리스트 저장
         courseDTO.setCourse_places(coursePlaceDTOs);
+        courseDTO.setCenter_x(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0));
+        courseDTO.setCenter_y(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0));
         return courseDTO;
 
     }
@@ -202,6 +208,10 @@ public class CourseService {
             coursePlaceDTOs.add(coursePlaceDTO);
         }
 
+        // 코스 평균 좌표 수정
+        course.setCenterX(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0));
+        course.setCenterY(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0));
+
         // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
@@ -211,6 +221,8 @@ public class CourseService {
         courseDTO.setCreated_at(course.getCreatedAt());
         courseDTO.setLike_count(course.getLikeCount());
         courseDTO.setCourse_places(coursePlaceDTOs);
+        courseDTO.setCenter_x(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0));
+        courseDTO.setCenter_y(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0));
         
         // 코스 DTO 반환
         return courseDTO;

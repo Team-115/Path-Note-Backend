@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
+import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.service.CourseService;
 
 import lombok.RequiredArgsConstructor;
@@ -66,25 +69,37 @@ public class CourseController {
     // 코스 신규 등록
     // 코스 완성 후 업로드 시 등록
     @PostMapping
-    public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseRequestDTO courseRequestDTO) {
+    public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal User user) {
+        courseRequestDTO.setUser_id(user.getUserId());
         CourseDTO courseDTO = courseService.createCourse(courseRequestDTO);
+        courseDTO.setUser_id(user.getUserId());
         return new ResponseEntity<>(courseDTO, HttpStatus.OK);
     }
 
     // PUT /api/courses/{course_id}
     // 코스 수정
     @PutMapping("/{course_id}")
-    public ResponseEntity<CourseDTO> editCourseById(@PathVariable Long course_id, @RequestBody CourseRequestDTO courseRequestDTO) {
-        CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
-        return new ResponseEntity<>(courseDTO, HttpStatus.OK);
+    public ResponseEntity<CourseDTO> editCourseById(@PathVariable Long course_id, @RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal User user) {
+        if (courseService.findCourseById(course_id).getUser_id() == user.getUserId()) {
+            CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
+            return new ResponseEntity<>(courseDTO, HttpStatus.OK);    
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     // DELETE /api/courses/{course_id}
     // 코스 삭제
     // 만들었던 코스를 삭제, 본인이 만든 코스만 삭제 가능
     @DeleteMapping("/{course_id}")
-    public ResponseEntity<Void> deleteCourseById(@PathVariable Long course_id) {
-        courseService.deleteCourseById(course_id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> deleteCourseById(@PathVariable Long course_id, @AuthenticationPrincipal User user) {
+        if (courseService.findCourseById(course_id).getUser_id() == user.getUserId()) {
+            courseService.deleteCourseById(course_id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }
