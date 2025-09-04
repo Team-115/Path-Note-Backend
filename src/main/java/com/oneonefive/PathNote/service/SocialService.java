@@ -149,6 +149,12 @@ public class SocialService {
 
     // 좋아요 조회
     @Transactional
+    public Like getLike(Long courseId, Long userId) {
+        return likeRepository.findByCourse_CourseIdAndUser_UserId(courseId, userId);
+    }
+
+    // 좋아요 갯수 조회
+    @Transactional
     public Long getLikes(Long courseId) {
         List<Like> likes = likeRepository.findByCourse_CourseId(courseId);
         return Long.valueOf(likes.size());

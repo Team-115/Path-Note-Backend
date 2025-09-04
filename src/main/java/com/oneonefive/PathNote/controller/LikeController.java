@@ -35,6 +35,15 @@ public class LikeController {
         return socialService.getLikes(course_id);
     }
 
+    // GET /api/courses/{course_id}/like
+    // 코스 좋아요 등록 여부 조회
+    @GetMapping("/{course_id}/like")
+    public boolean getIsLike(@PathVariable("course_id") Long course_id, @AuthenticationPrincipal User user) {
+        Like like = socialService.getLike(course_id, user.getUserId());
+        if (like != null) return true;
+        else return false;
+    }
+
     // POST /api/courses/{course_id}/likes
     // 코스 좋아요 등록 및 삭제
     @PostMapping("/{course_id}/likes")
