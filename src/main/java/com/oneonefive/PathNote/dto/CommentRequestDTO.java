@@ -23,7 +23,7 @@ public class CommentRequestDTO {
     private Long course_id;
 
     // 회원 ID
-    private Long user_id;
+    private UserRequestDTO user;
 
     // 댓글 내용
     private String content;

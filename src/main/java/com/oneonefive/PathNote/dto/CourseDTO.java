@@ -19,8 +19,8 @@ public class CourseDTO {
     // 코스 ID
     private Long course_id;
 
-    // 회원 ID
-    private Long user_id;
+    // 회원 정보
+    private UserDTO user;
 
     // 코스 이름
     private String course_name;

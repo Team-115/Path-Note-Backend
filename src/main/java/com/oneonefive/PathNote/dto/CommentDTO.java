@@ -16,11 +16,11 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CommentDTO {
 
-    // 코스 ID
-    private Long course_id;
-    
     // 댓글 ID
     private Long comment_id;
+
+    // 코스 ID
+    private Long course_id;
 
     // 댓글 내용
     private String content;

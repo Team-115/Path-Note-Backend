@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.oneonefive.PathNote.dto.CommentDTO;
 import com.oneonefive.PathNote.dto.CommentRequestDTO;
+import com.oneonefive.PathNote.dto.UserRequestDTO;
 import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.service.SocialService;
 
@@ -41,8 +42,12 @@ public class CommentController {
     // course_id에 해당하는 게시물에 댓글 신규 등록
     @PostMapping("/{course_id}/comments")
     public CommentDTO createComment(@PathVariable("course_id") Long course_id, @RequestBody CommentRequestDTO commentRequestDTO, @AuthenticationPrincipal User user) {
+        UserRequestDTO userRequestDTO = new UserRequestDTO();
+        
         commentRequestDTO.setCourse_id(course_id);
-        commentRequestDTO.setUser_id(user.getUserId());
+        userRequestDTO.setUserId(user.getUserId());
+        commentRequestDTO.setUser(userRequestDTO);
+
         return socialService.createComment(commentRequestDTO);
     }
 
@@ -51,9 +56,12 @@ public class CommentController {
     @DeleteMapping("/{course_id}/comments/{comment_id}")
     public ResponseEntity<Void> deleteComment(@PathVariable("course_id") Long course_id, @PathVariable("comment_id") Long comment_id, @AuthenticationPrincipal User user) {
         CommentRequestDTO commentRequestDTO = new CommentRequestDTO();
+        UserRequestDTO userRequestDTO = new UserRequestDTO();
+        
         commentRequestDTO.setCourse_id(course_id);
         commentRequestDTO.setComment_id(comment_id);
-        commentRequestDTO.setUser_id(user.getUserId());
+        userRequestDTO.setUserId(user.getUserId());
+
         boolean hasDeleted = socialService.deleteComment(commentRequestDTO);
         if (hasDeleted) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

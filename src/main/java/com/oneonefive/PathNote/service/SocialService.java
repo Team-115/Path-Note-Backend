@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.print.DocFlavor.STRING;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import com.oneonefive.PathNote.dto.CommentDTO;
 import com.oneonefive.PathNote.dto.CommentRequestDTO;
 import com.oneonefive.PathNote.dto.LikeDTO;
 import com.oneonefive.PathNote.dto.LikeRequestDTO;
+import com.oneonefive.PathNote.dto.UserDTO;
 import com.oneonefive.PathNote.entity.Comment;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.Like;
@@ -49,11 +52,14 @@ public class SocialService {
 
         // 필요한 내용들을 댓글 DTO 리스트에 저장
         for (Comment comment : commentList) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setNickname(comment.getUser().getNickname());
+            userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", comment.getUser().getProfilePreset()));
             CommentDTO commentDTO = new CommentDTO(
                     comment.getCommentId(),
                     comment.getCourse().getCourseId(),
-                    comment.getUser().getUserId(),
                     comment.getContent(),
+                    userDTO,
                     comment.getCreatedAt()
                     );
                 commentDTOList.add(commentDTO);
@@ -69,7 +75,11 @@ public class SocialService {
     @Transactional
     public CommentDTO createComment(CommentRequestDTO commentRequestDTO) {
         Course course = courseRepository.findById(commentRequestDTO.getCourse_id()).orElse(null);
-        User user = userRepository.findById(commentRequestDTO.getUser_id()).orElse(null);
+        User user = userRepository.findById(commentRequestDTO.getUser().getUserId()).orElse(null);
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setNickname(user.getNickname());
+        userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s", user.getProfilePreset()));
 
         Comment comment = new Comment();
         comment.setCourse(course);
@@ -80,7 +90,7 @@ public class SocialService {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setComment_id(comment.getCommentId());
         commentDTO.setCourse_id(comment.getCourse().getCourseId());
-        commentDTO.setUser_id(comment.getUser().getUserId());
+        commentDTO.setUser(userDTO);
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreated_at(comment.getCreatedAt());
         return commentDTO;
@@ -92,7 +102,7 @@ public class SocialService {
         Comment comment = commentRepository.findById(commentRequestDTO.getComment_id()).orElse(null);
         if (comment == null) return false;
         
-        if (comment.getUser().getUserId() == commentRequestDTO.getUser_id()) {
+        if (comment.getUser().getUserId() == commentRequestDTO.getUser().getUserId()) {
             commentRepository.deleteById(commentRequestDTO.getComment_id());
             return true;
         }
@@ -129,7 +139,6 @@ public class SocialService {
             LikeDTO likeDTO = new LikeDTO();
             likeDTO.setLike_id(like.getLikeId());
             likeDTO.setCourse_id(like.getLikeId());
-            likeDTO.setUser_id(like.getUser().getUserId());
             likeDTO.setCreated_at(like.getCreatedAt());
             return likeDTO;
         }

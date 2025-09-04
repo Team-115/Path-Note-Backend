@@ -11,12 +11,15 @@ import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceRequestDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
+import com.oneonefive.PathNote.dto.UserDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
 import com.oneonefive.PathNote.entity.Place;
+import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.repository.CoursePlaceRepository;
 import com.oneonefive.PathNote.repository.CourseRepository;
 import com.oneonefive.PathNote.repository.PlaceRepository;
+import com.oneonefive.PathNote.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -31,6 +34,9 @@ public class CourseService {
 
     @Autowired
     private CoursePlaceRepository coursePlaceRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // 코스 전체 조회
     @Transactional
@@ -78,10 +84,14 @@ public class CourseService {
                 coursePlaceDTOs.add(coursePlaceDTO);
             }
 
+            User user = userRepository.findById(course.getUserId()).orElse(null);
+            UserDTO userDTO = new UserDTO();
+            userDTO.setNickname(user.getNickname());
+            userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
             // (코스 DTO) 생성
             CourseDTO courseDTO = new CourseDTO(
                 course.getCourseId(),
-                course.getUserId(),
+                userDTO,
                 course.getCourseName(),
                 course.getCourseDescription(),
                 course.getCourseCategory(),
@@ -107,9 +117,13 @@ public class CourseService {
 
         // 코스 엔티티 조회
         Course course = courseRepository.findById(course_id).orElse(null);
+        User user = userRepository.findById(course.getUserId()).orElse(null);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setNickname(user.getNickname());
+        userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
         CourseDTO courseDTO = new CourseDTO(
             course.getCourseId(),
-            course.getUserId(),
+            userDTO,
             course.getCourseName(),
             course.getCourseDescription(),
             course.getCourseCategory(),
@@ -150,6 +164,11 @@ public class CourseService {
     // 코스 생성
     @Transactional
     public CourseDTO createCourse(CourseRequestDTO courseRequestDTO) {
+
+        User user = userRepository.findById(courseRequestDTO.getUser_id()).orElse(null);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setNickname(user.getNickname());
+        userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
 
         // 장소 레포지토리를 통해 poi_id를 조회하여 장소 데이터가 있는지 확인
         // 없다면 CoursePlaceRequestDTO에 포함된 내용을 토대로 새로운 장소 데이터 생성
@@ -215,6 +234,7 @@ public class CourseService {
         // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
+        courseDTO.setUser(userDTO);
         courseDTO.setCourse_name(course.getCourseName());
         courseDTO.setCourse_description(course.getCourseDescription());
         courseDTO.setCourse_category(course.getCourseCategory());
@@ -234,6 +254,10 @@ public class CourseService {
         
         // 코스 엔티티 조회
         Course course = courseRepository.findById(course_id).orElse(null);
+        User user = userRepository.findById(course.getUserId()).orElse(null);
+        
+        // 유저 ID 조회
+        if (user.getUserId() != courseRequestDTO.getUser_id()) return null;
 
         // 기존 코스-장소 제거
         course.getCoursePlaces().clear();
@@ -280,7 +304,9 @@ public class CourseService {
         // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
-        courseDTO.setUser_id(course.getUserId());
+        UserDTO userDTO = new UserDTO();
+        userDTO.setNickname(user.getNickname());
+        userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
         courseDTO.setCourse_name(course.getCourseName());
         courseDTO.setCourse_description(course.getCourseDescription());
         courseDTO.setCourse_category(course.getCourseCategory());
@@ -294,8 +320,15 @@ public class CourseService {
     // 코스 제거
     // 코스-장소 리스트 필드의 Cascade 옵션을 통해 관련 데이터도 함께 제거됨
     @Transactional
-    public void deleteCourseById(Long course_id) {
-        courseRepository.deleteById(course_id);
+    public boolean deleteCourseById(Long course_id, Long user_id) {
+        Course course = courseRepository.findById(course_id).orElse(null);
+        if (course != null && course.getUserId() == user_id) {
+            courseRepository.deleteById(course_id);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
 }

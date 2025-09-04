@@ -22,9 +22,6 @@ public class LikeDTO {
     // 코스 ID
     private Long course_id;
 
-    // 회원 ID
-    private Long user_id;
-
     // 생성 시간
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime created_at;
