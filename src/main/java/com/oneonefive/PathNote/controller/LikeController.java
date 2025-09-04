@@ -3,14 +3,19 @@ package com.oneonefive.PathNote.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oneonefive.PathNote.dto.CommentDTO;
+import com.oneonefive.PathNote.dto.LikeRequestDTO;
+import com.oneonefive.PathNote.dto.LikeDTO;
 import com.oneonefive.PathNote.entity.Like;
+import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.service.SocialService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,14 +31,17 @@ public class LikeController {
     // GET /api/courses/{course_id}/likes
     // 코스 좋아요 갯수 조회
     @GetMapping("/{course_id}/likes")
-    public List<CommentDTO> getLike(@PathVariable("course_id") Long course_id) {
-        return socialService.getComments(course_id);
+    public Long getLike(@PathVariable("course_id") Long course_id) {
+        return socialService.getLikes(course_id);
     }
 
     // POST /api/courses/{course_id}/likes
-    // 코스 좋아요 등록
+    // 코스 좋아요 등록 및 삭제
     @PostMapping("/{course_id}/likes")
-    public Like createLike() {
-        return socialService.createLike(null);
+    public LikeDTO createLike(@PathVariable("course_id") Long course_id, @AuthenticationPrincipal User user) {
+        LikeRequestDTO likeRequestDTO = new LikeRequestDTO();
+        likeRequestDTO.setCourse_id(course_id);
+        likeRequestDTO.setUser_id(user.getUserId());
+        return socialService.clickLike(likeRequestDTO);
     }
 }

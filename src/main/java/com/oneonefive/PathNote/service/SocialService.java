@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.oneonefive.PathNote.dto.CommentDTO;
 import com.oneonefive.PathNote.dto.CommentRequestDTO;
+import com.oneonefive.PathNote.dto.LikeDTO;
+import com.oneonefive.PathNote.dto.LikeRequestDTO;
 import com.oneonefive.PathNote.entity.Comment;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.Like;
@@ -86,28 +88,53 @@ public class SocialService {
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long comment_id) {
-        commentRepository.deleteById(comment_id);
+    public void deleteComment(Long commentId) {
+        commentRepository.deleteById(commentId);
     }
     
     // 좋아요 등록
     @Transactional
-    public Like createLike(Like like) {
-        Course course = like.getCourse();
-        course.setLikeCount(course.getLikeCount() + 1);
-        courseRepository.save(course);
-        return likeRepository.save(like);
+    public LikeDTO clickLike(LikeRequestDTO likeRequestDTO) {
+        Course course = courseRepository.findById(likeRequestDTO.getCourse_id()).orElse(null);
+        User user = userRepository.findById(likeRequestDTO.getUser_id()).orElse(null);
+
+        Like existingLike = likeRepository.findByCourse_CourseIdAndUser_UserId(likeRequestDTO.getCourse_id(), likeRequestDTO.getUser_id());
+        // 이미 좋아요를 눌렀을 경우
+        if (existingLike != null) {
+            course.setLikeCount(course.getLikeCount() - 1);
+            course = courseRepository.save(course);
+            likeRepository.deleteById(existingLike.getLikeId());
+
+            return null;
+        }
+        // 좋아요를 처음 눌렀을 경우
+        else {
+            course.setLikeCount(course.getLikeCount() + 1);
+            course = courseRepository.save(course);
+        
+            Like like = new Like();
+            like.setCourse(course);
+            like.setUser(user);
+            like = likeRepository.save(like);
+
+            LikeDTO likeDTO = new LikeDTO();
+            likeDTO.setLike_id(like.getLikeId());
+            likeDTO.setCourse_id(like.getLikeId());
+            likeDTO.setUser_id(like.getUser().getUserId());
+            likeDTO.setCreated_at(like.getCreatedAt());
+            return likeDTO;
+        }
     }
 
     // 좋아요 삭제
     @Transactional
-    public void deleteLike(Long like_id) {
-        Like like = likeRepository.findById(like_id).orElse(null);
+    public void deleteLike(Long likeId) {
+        Like like = likeRepository.findById(likeId).orElse(null);
         if (like != null) {
             Course course = like.getCourse();
             course.setLikeCount(course.getLikeCount() - 1);
             courseRepository.save(course);
-            likeRepository.deleteById(like_id);
+            likeRepository.deleteById(likeId);
         }
     }
 

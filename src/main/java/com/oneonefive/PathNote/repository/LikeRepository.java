@@ -10,4 +10,5 @@ import com.oneonefive.PathNote.entity.Like;
 @Repository
 public interface LikeRepository extends JpaRepository<Like, Long> {
     List<Like> findByCourse_CourseId(Long courseId);
+    Like findByCourse_CourseIdAndUser_UserId(Long courseId, Long userId);
 }
