@@ -65,15 +65,23 @@ public class SocialService {
 
     // 댓글 등록
     @Transactional
-    public Comment createComment(CommentRequestDTO commentRequestDTO) {
+    public CommentDTO createComment(CommentRequestDTO commentRequestDTO) {
         Course course = courseRepository.findById(commentRequestDTO.getCourse_id()).orElse(null);
         User user = userRepository.findById(commentRequestDTO.getUser_id()).orElse(null);
 
         Comment comment = new Comment();
-        comment.setContent(commentRequestDTO.getContent());
         comment.setCourse(course);
         comment.setUser(user);
-        return commentRepository.save(comment);
+        comment.setContent(commentRequestDTO.getContent());
+        comment = commentRepository.save(comment);
+
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setComment_id(comment.getCommentId());
+        commentDTO.setCourse_id(comment.getCourse().getCourseId());
+        commentDTO.setUser_id(comment.getUser().getUserId());
+        commentDTO.setContent(comment.getContent());
+        commentDTO.setCreated_at(comment.getCreatedAt());
+        return commentDTO;
     }
 
     // 댓글 삭제
@@ -101,5 +109,12 @@ public class SocialService {
             courseRepository.save(course);
             likeRepository.deleteById(like_id);
         }
+    }
+
+    // 좋아요 조회
+    @Transactional
+    public Long getLikes(Long courseId) {
+        List<Like> likes = likeRepository.findByCourse_CourseId(courseId);
+        return Long.valueOf(likes.size());
     }
 }
