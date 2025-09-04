@@ -88,8 +88,17 @@ public class SocialService {
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long commentId) {
-        commentRepository.deleteById(commentId);
+    public boolean deleteComment(CommentRequestDTO commentRequestDTO) {
+        Comment comment = commentRepository.findById(commentRequestDTO.getComment_id()).orElse(null);
+        if (comment == null) return false;
+        
+        if (comment.getUser().getUserId() == commentRequestDTO.getUser_id()) {
+            commentRepository.deleteById(commentRequestDTO.getComment_id());
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
     // 좋아요 등록
