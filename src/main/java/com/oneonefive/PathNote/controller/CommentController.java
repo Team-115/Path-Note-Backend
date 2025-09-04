@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.oneonefive.PathNote.dto.CommentDTO;
 import com.oneonefive.PathNote.dto.CommentRequestDTO;
-import com.oneonefive.PathNote.entity.Comment;
 import com.oneonefive.PathNote.service.SocialService;
 
 import lombok.RequiredArgsConstructor;

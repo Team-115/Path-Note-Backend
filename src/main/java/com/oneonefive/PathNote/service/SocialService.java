@@ -110,4 +110,11 @@ public class SocialService {
             likeRepository.deleteById(like_id);
         }
     }
+
+    // 좋아요 조회
+    @Transactional
+    public Long getLikes(Long courseId) {
+        List<Like> likes = likeRepository.findByCourse_CourseId(courseId);
+        return Long.valueOf(likes.size());
+    }
 }

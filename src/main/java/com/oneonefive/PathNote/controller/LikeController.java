@@ -24,14 +24,14 @@ public class LikeController {
     private final SocialService socialService;
 
     // GET /api/courses/{course_id}/likes
-    // 코스 전체 조회
-    // 코스 페이지 열람시 우측 컴포넌트에 표시
+    // 코스 좋아요 갯수 조회
     @GetMapping("/{course_id}/likes")
-    public List<CommentDTO> getAllCourses(@PathVariable("course_id") Long course_id) {
+    public List<CommentDTO> getLike(@PathVariable("course_id") Long course_id) {
         return socialService.getComments(course_id);
     }
 
     // POST /api/courses/{course_id}/likes
+    // 코스 좋아요 등록
     @PostMapping("/{course_id}/likes")
     public Like createLike() {
         return socialService.createLike(null);
