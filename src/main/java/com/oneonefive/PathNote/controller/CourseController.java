@@ -72,7 +72,6 @@ public class CourseController {
     public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal User user) {
         courseRequestDTO.setUser_id(user.getUserId());
         CourseDTO courseDTO = courseService.createCourse(courseRequestDTO);
-        courseDTO.setUser_id(user.getUserId());
         return new ResponseEntity<>(courseDTO, HttpStatus.OK);
     }
 
@@ -80,8 +79,9 @@ public class CourseController {
     // 코스 수정
     @PutMapping("/{course_id}")
     public ResponseEntity<CourseDTO> editCourseById(@PathVariable Long course_id, @RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal User user) {
-        if (courseService.findCourseById(course_id).getUser_id() == user.getUserId()) {
-            CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
+        CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
+        if (courseDTO != null) {
+            
             return new ResponseEntity<>(courseDTO, HttpStatus.OK);    
         }
         else {
@@ -94,8 +94,7 @@ public class CourseController {
     // 만들었던 코스를 삭제, 본인이 만든 코스만 삭제 가능
     @DeleteMapping("/{course_id}")
     public ResponseEntity<Void> deleteCourseById(@PathVariable Long course_id, @AuthenticationPrincipal User user) {
-        if (courseService.findCourseById(course_id).getUser_id() == user.getUserId()) {
-            courseService.deleteCourseById(course_id);
+        if (courseService.deleteCourseById(course_id, user.getUserId())) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         else {

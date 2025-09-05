@@ -2,6 +2,8 @@ package com.oneonefive.PathNote.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,6 +46,7 @@ public class Like {
 
     // 생성 시간
     // 좋아요를 누른 시간
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

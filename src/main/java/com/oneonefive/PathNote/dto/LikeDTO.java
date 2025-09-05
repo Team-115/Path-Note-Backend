@@ -14,19 +14,13 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDTO {
+public class LikeDTO {
 
-    // 댓글 ID
-    private Long comment_id;
+    // 좋아요 ID
+    private Long like_id;
 
     // 코스 ID
     private Long course_id;
-
-    // 댓글 내용
-    private String content;
-
-    // 댓글 작성자 정보
-    private UserDTO user;
 
     // 생성 시간
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
