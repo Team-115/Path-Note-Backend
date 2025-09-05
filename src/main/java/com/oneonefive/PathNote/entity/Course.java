@@ -44,6 +44,9 @@ public class Course {
     // 코스 카테고리
     @Column(name = "course_category")
     private String courseCategory;
+    // 코스 해쉬태그
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Hashtag> hashtags;
 
     // 코스 생성 시간
     @CreationTimestamp
