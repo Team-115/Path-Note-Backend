@@ -76,8 +76,6 @@ public class CourseService {
             List<HashtagDTO> hashtagDTOs = new ArrayList<>();
             for (Hashtag hashtag : course.getHashtags()) {
                 HashtagDTO hashtagDTO = new HashtagDTO();
-                hashtagDTO.setHashtag_id(hashtag.getHashTagId());
-                hashtagDTO.setCourse_id(hashtag.getCourse().getCourseId());
                 hashtagDTO.setContent(hashtag.getContent());
                 hashtagDTOs.add(hashtagDTO);
             }
@@ -141,8 +139,6 @@ public class CourseService {
         List<HashtagDTO> hashtagDTOs = new ArrayList<>();
         for (Hashtag hashtag : course.getHashtags()) {
             HashtagDTO hashtagDTO = new HashtagDTO();
-            hashtagDTO.setHashtag_id(hashtag.getHashTagId());
-            hashtagDTO.setCourse_id(hashtag.getCourse().getCourseId());
             hashtagDTO.setContent(hashtag.getContent());
             hashtagDTOs.add(hashtagDTO);
         }
@@ -237,8 +233,6 @@ public class CourseService {
         List<HashtagDTO> hashtagDTOs = new ArrayList<>();
         for (Hashtag hashtag : createdHashtags) {
             HashtagDTO hashtagDTO = new HashtagDTO();
-            hashtagDTO.setHashtag_id(hashtag.getHashTagId());
-            hashtagDTO.setCourse_id(hashtag.getCourse().getCourseId());
             hashtagDTO.setContent(hashtag.getContent());
             hashtagDTOs.add(hashtagDTO);
         }
@@ -338,8 +332,6 @@ public class CourseService {
         List<HashtagDTO> hashtagDTOs = new ArrayList<>();
         for (Hashtag hashtag : createdHashtags) {
             HashtagDTO hashtagDTO = new HashtagDTO();
-            hashtagDTO.setHashtag_id(hashtag.getHashTagId());
-            hashtagDTO.setCourse_id(hashtag.getCourse().getCourseId());
             hashtagDTO.setContent(hashtag.getContent());
             hashtagDTOs.add(hashtagDTO);
         }
