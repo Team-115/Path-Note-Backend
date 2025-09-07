@@ -79,6 +79,7 @@ public class CourseController {
     // 코스 수정
     @PutMapping("/{course_id}")
     public ResponseEntity<CourseDTO> editCourseById(@PathVariable Long course_id, @RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal User user) {
+        courseRequestDTO.setUser_id(user.getUserId());
         CourseDTO courseDTO = courseService.editCourse(course_id, courseRequestDTO);
         if (courseDTO != null) {
             
