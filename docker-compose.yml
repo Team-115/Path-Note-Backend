@@ -1,21 +1,23 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: pathnote-mysql
-    restart: always
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: pathnote-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: root1234
-      MYSQL_DATABASE: pathnote
-      MYSQL_USER: pathnote_user
-      MYSQL_PASSWORD: 12345
+      POSTGRES_USER: pathnote_user
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: pathnote
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./mysql/init:/docker-entrypoint-initdb.d
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/db/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pathnote_user -d pathnote"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
-  mysql_data:
+  postgres_data:
