@@ -10,10 +10,22 @@ CREATE TABLE IF NOT EXISTS places (
     place_category VARCHAR(50) NOT NULL,
     place_address VARCHAR(100) NOT NULL,
     place_coordinate_x DOUBLE PRECISION NOT NULL,
-    place_coordinate_y DOUBLE PRECISION NOT NULL
+    place_coordinate_y DOUBLE PRECISION NOT NULL,
+    PRIMARY KEY (place_id)
 );
 
--- 2. 코스 테이블
+-- 2. 사용자 테이블
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGINT GENERATED ALWAYS AS IDENTITY,
+    kakao_id VARCHAR(100) NOT NULL UNIQUE,
+    nickname VARCHAR(50),
+    profile_preset VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    preference_embedding vector(768),         -- 사용자 선호도 임베딩
+    PRIMARY KEY (user_id)
+);
+
+-- 3. 코스 테이블
 CREATE TABLE IF NOT EXISTS courses (
     course_id BIGINT GENERATED ALWAYS AS IDENTITY,
     course_name VARCHAR(100) NOT NULL,
@@ -21,13 +33,13 @@ CREATE TABLE IF NOT EXISTS courses (
     course_description TEXT,
     course_category VARCHAR(50),
     course_image_url VARCHAR(255),
-    course_vector VECTOR(768), -- 벡터 임베딩 저장용
+    course_embedding VECTOR(768), -- 코스 이름 + 설명 임베딩
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (course_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- 3. 코스-장소 매핑 테이블
+-- 4. 코스-장소 매핑 테이블
 CREATE TABLE IF NOT EXISTS course_places (
     course_place_id BIGINT GENERATED ALWAYS AS IDENTITY,
     course_id BIGINT NOT NULL,
@@ -38,16 +50,6 @@ CREATE TABLE IF NOT EXISTS course_places (
     PRIMARY KEY (course_place_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (place_id) REFERENCES places(place_id) ON DELETE CASCADE
-);
-
--- 4. 사용자 테이블
-CREATE TABLE IF NOT EXISTS users (
-    user_id BIGINT GENERATED ALWAYS AS IDENTITY,
-    kakao_id VARCHAR(100) NOT NULL UNIQUE,
-    nickname VARCHAR(50),
-    profile_preset VARCHAR(10) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id)
 );
 
 -- 5. 코스 좋아요 테이블
@@ -102,7 +104,7 @@ CREATE INDEX idx_places_category ON places(place_category);
 CREATE INDEX idx_places_name_trgm ON places USING gin (place_name gin_trgm_ops);
 
 -- 벡터 검색용 (pgvector)
-CREATE INDEX idx_courses_vector ON courses USING ivfflat (course_vector vector_l2_ops) WITH (lists = 100);
+CREATE INDEX idx_courses_vector ON courses USING ivfflat (course_embedding vector_l2_ops) WITH (lists = 100);
 
 --- 장소 패턴 최적화 인덱스
 CREATE INDEX idx_place_patterns_length ON place_patterns(pattern_length);

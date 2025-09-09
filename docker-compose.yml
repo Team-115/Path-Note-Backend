@@ -3,18 +3,18 @@ version: '3.8'
 services:
   postgres:
     image: ankane/pgvector:latest
-    container_name: travel-ai-postgres
+    container_name: pathnote-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: travel_ai
+      POSTGRES_USER: pathnote_user
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: pathnote
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./src/db/migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U pathnote_user -d pathnote"]
       interval: 5s
       timeout: 3s
       retries: 5
