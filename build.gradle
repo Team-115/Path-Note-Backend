@@ -33,8 +33,12 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	compileOnly 'org.projectlombok:lombok'
-	// runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// MySQL 의존성 추가
+	// runtimeOnly 'com.mysql:mysql-connector-j'
+	// PostgreSQL 의존성 추가
+	runtimeOnly 'org.postgresql:postgresql'
+
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
