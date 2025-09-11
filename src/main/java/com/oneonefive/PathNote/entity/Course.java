@@ -8,9 +8,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -42,11 +45,9 @@ public class Course {
     @Column(name = "course_description")
     private String courseDescription;
     // 코스 카테고리
-    @Column(name = "course_category")
-    private String courseCategory;
-    // 코스 해쉬태그
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Hashtag> hashtags;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category courseCategory;
 
     // 코스 생성 시간
     @CreationTimestamp

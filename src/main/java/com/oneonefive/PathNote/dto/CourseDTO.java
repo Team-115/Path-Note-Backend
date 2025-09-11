@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.oneonefive.PathNote.entity.Hashtag;
+import com.oneonefive.PathNote.entity.Category;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -30,10 +30,7 @@ public class CourseDTO {
     private String course_description;
 
     // 코스 카테고리
-    private String course_category;
-
-    // 코스 해쉬태그
-    private List<HashtagDTO> course_hashtag;
+    private CategoryDTO course_category;
 
     // 코스 생성 시간
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")

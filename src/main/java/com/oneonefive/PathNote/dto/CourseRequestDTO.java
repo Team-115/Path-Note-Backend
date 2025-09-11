@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.oneonefive.PathNote.entity.Hashtag;
+import com.oneonefive.PathNote.entity.Category;
 
 import lombok.AllArgsConstructor;
 
@@ -30,7 +30,7 @@ public class CourseRequestDTO {
     private String course_category;
 
     // 코스 해시태그
-    private List<Hashtag> course_hashtag;
+    private List<Category> course_hashtag;
 
     // 코스-장소 리스트
     private List<CoursePlaceRequestDTO> course_places = new ArrayList();

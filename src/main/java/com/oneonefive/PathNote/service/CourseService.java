@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.oneonefive.PathNote.dto.CategoryDTO;
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceRequestDTO;
@@ -15,12 +16,12 @@ import com.oneonefive.PathNote.dto.HashtagDTO;
 import com.oneonefive.PathNote.dto.UserDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
-import com.oneonefive.PathNote.entity.Hashtag;
+import com.oneonefive.PathNote.entity.Category;
 import com.oneonefive.PathNote.entity.Place;
 import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.repository.CoursePlaceRepository;
 import com.oneonefive.PathNote.repository.CourseRepository;
-import com.oneonefive.PathNote.repository.HashtagRepository;
+import com.oneonefive.PathNote.repository.CategoryRepository;
 import com.oneonefive.PathNote.repository.PlaceRepository;
 import com.oneonefive.PathNote.repository.UserRepository;
 
@@ -42,27 +43,22 @@ public class CourseService {
     private UserRepository userRepository;
 
     @Autowired
-    private HashtagRepository hashtagRepository;
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CategoryService categoryService;
 
     // 코스 전체 조회
     @Transactional
-    public List<CourseDTO> findCourseAll(String region, String category) {
+    public List<CourseDTO> findCourseAll(String region) {
 
         List<Course> courses;
 
-        // region과 category가 모두 있으면 
-        if (region != null && category != null) {
-            courses = courseRepository.findByPlaceAddressStartingWithAndCourseCategory(region, category);
-        } 
-        // region만 있을 경우
-        else if (region != null) {
+        // region이 있을 경우
+        if (region != null) {
             courses = courseRepository.findByPlaceAddressStartingWith(region);
         }
-        // category 있을 경우 (키워드 검색은 코스명이나 설명, 태그 등에서 검색할 수 있습니다)
-        else if (category != null) {
-            courses = courseRepository.findByCourseCategory(category);
-        }
-        // region과 category 모두 없을
+        // region이 없을 경우
         else {
             courses = courseRepository.findAll();
         }
@@ -72,13 +68,6 @@ public class CourseService {
 
         for (Course course : courses) {
             
-            // 해쉬태그 DTO 생성
-            List<HashtagDTO> hashtagDTOs = new ArrayList<>();
-            for (Hashtag hashtag : course.getHashtags()) {
-                HashtagDTO hashtagDTO = new HashtagDTO();
-                hashtagDTO.setContent(hashtag.getContent());
-                hashtagDTOs.add(hashtagDTO);
-            }
             // (코스-장소 DTO 리스트) 생성
             List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
             // 코스와 연관관계가 맺어져있는 CoursePlace를 CoursePlaceDTO로 변환 후 (코스-장소 DTO 리스트)에 저장
@@ -101,14 +90,16 @@ public class CourseService {
             UserDTO userDTO = new UserDTO();
             userDTO.setNickname(user.getNickname());
             userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
+            CategoryDTO categoryDTO = new CategoryDTO();
+            categoryDTO.setCategory_id(course.getCourseCategory().getCategoryId());
+            categoryDTO.setContent(course.getCourseCategory().getContent());
             // (코스 DTO) 생성
             CourseDTO courseDTO = new CourseDTO(
                 course.getCourseId(),
                 userDTO,
                 course.getCourseName(),
                 course.getCourseDescription(),
-                course.getCourseCategory(),
-                hashtagDTOs,
+                categoryDTO,
                 course.getCreatedAt(),
                 course.getLikeCount(),
                 // (코스-장소 DTO 리스트) 삽입
@@ -135,20 +126,15 @@ public class CourseService {
         UserDTO userDTO = new UserDTO();
         userDTO.setNickname(user.getNickname());
         userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
-        // 해쉬태그 DTO 생성
-        List<HashtagDTO> hashtagDTOs = new ArrayList<>();
-        for (Hashtag hashtag : course.getHashtags()) {
-            HashtagDTO hashtagDTO = new HashtagDTO();
-            hashtagDTO.setContent(hashtag.getContent());
-            hashtagDTOs.add(hashtagDTO);
-        }
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategory_id(course.getCourseCategory().getCategoryId());
+        categoryDTO.setContent(course.getCourseCategory().getContent());
         CourseDTO courseDTO = new CourseDTO(
             course.getCourseId(),
             userDTO,
             course.getCourseName(),
             course.getCourseDescription(),
-            course.getCourseCategory(),
-            hashtagDTOs,
+            categoryDTO,
             course.getCreatedAt(),
             course.getLikeCount(),
             new ArrayList<>(),
@@ -207,35 +193,15 @@ public class CourseService {
             }
         }
 
-        
         // 코스 데이터 생성
         Course course = new Course();
         course.setUserId(courseRequestDTO.getUser_id());
         course.setCourseName(courseRequestDTO.getCourse_name());
         course.setCourseDescription(courseRequestDTO.getCourse_description());
-        course.setCourseCategory(courseRequestDTO.getCourse_category());
+        course.setCourseCategory(categoryService.getAndCreateCategory(courseRequestDTO.getCourse_category()));
 
         // 코스 저장
         course = courseRepository.save(course);
-
-        // 해쉬태그 저장
-        List<Hashtag> createdHashtags = new ArrayList<>();
-        for (Hashtag hashtag : courseRequestDTO.getCourse_hashtag()) {
-            Hashtag createdHashtag = new Hashtag();
-            createdHashtag.setCourse(course);
-            createdHashtag.setContent(hashtag.getContent());
-            createdHashtags.add(createdHashtag);
-        }
-        hashtagRepository.saveAll(createdHashtags);
-        course.setHashtags(createdHashtags);
-
-        // 해쉬태그 DTO 생성
-        List<HashtagDTO> hashtagDTOs = new ArrayList<>();
-        for (Hashtag hashtag : createdHashtags) {
-            HashtagDTO hashtagDTO = new HashtagDTO();
-            hashtagDTO.setContent(hashtag.getContent());
-            hashtagDTOs.add(hashtagDTO);
-        }
 
         // 코스-장소 데이터 생성
         List<CoursePlace> coursePlaces = new ArrayList<>();
@@ -273,14 +239,18 @@ public class CourseService {
         course.setCenterX(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0));
         course.setCenterY(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0));
 
+        // 카테고리 DTO 생성
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategory_id(course.getCourseCategory().getCategoryId());
+        categoryDTO.setContent(course.getCourseCategory().getContent());
+
         // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
         courseDTO.setUser(userDTO);
         courseDTO.setCourse_name(course.getCourseName());
         courseDTO.setCourse_description(course.getCourseDescription());
-        courseDTO.setCourse_category(course.getCourseCategory());
-        courseDTO.setCourse_hashtag(hashtagDTOs);
+        courseDTO.setCourse_category(categoryDTO);
         courseDTO.setCreated_at(course.getCreatedAt());
         courseDTO.setLike_count(course.getLikeCount());
         courseDTO.setCourse_places(coursePlaceDTOs);
@@ -304,7 +274,6 @@ public class CourseService {
 
         // 기존 데이터 제거
         course.getCoursePlaces().clear();
-        course.getHashtags().clear();
 
         // 코스-장소 데이터 생성
         List<CoursePlace> coursePlaces = new ArrayList<>();
@@ -317,32 +286,12 @@ public class CourseService {
             createdCoursePlace.setLeaveTime(coursePlace.getPlace_leave_time());
             coursePlaces.add(createdCoursePlace);
         }
-
-        // 해쉬태그 저장
-        List<Hashtag> createdHashtags = new ArrayList<>();
-        for (Hashtag hashtag : courseRequestDTO.getCourse_hashtag()) {
-            Hashtag createdHashtag = new Hashtag();
-            createdHashtag.setCourse(course);
-            createdHashtag.setContent(hashtag.getContent());
-            createdHashtags.add(createdHashtag);
-        }
-        createdHashtags = hashtagRepository.saveAll(createdHashtags);
-
-        // 해쉬태그 DTO 생성
-        List<HashtagDTO> hashtagDTOs = new ArrayList<>();
-        for (Hashtag hashtag : createdHashtags) {
-            HashtagDTO hashtagDTO = new HashtagDTO();
-            hashtagDTO.setContent(hashtag.getContent());
-            hashtagDTOs.add(hashtagDTO);
-        }
-
         // 코스 필드 수정
         course.setCourseName(courseRequestDTO.getCourse_name());
-        course.setCourseCategory(courseRequestDTO.getCourse_category());
+        course.setCourseCategory(categoryService.getAndCreateCategory(courseRequestDTO.getCourse_category()));
         course.setCourseDescription(courseRequestDTO.getCourse_description());
         course.setCreatedAt(LocalDateTime.now());
         course.getCoursePlaces().addAll(coursePlaces);
-        course.getHashtags().addAll(createdHashtags);
 
         // 코스 저장
         course = courseRepository.save(course);
@@ -364,6 +313,10 @@ public class CourseService {
             coursePlaceDTOs.add(coursePlaceDTO);
         }
 
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategory_id(course.getCourseCategory().getCategoryId());
+        categoryDTO.setContent(course.getCourseCategory().getContent());
+
         // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
@@ -373,8 +326,7 @@ public class CourseService {
         courseDTO.setUser(userDTO);
         courseDTO.setCourse_name(course.getCourseName());
         courseDTO.setCourse_description(course.getCourseDescription());
-        courseDTO.setCourse_category(course.getCourseCategory());
-        courseDTO.setCourse_hashtag(hashtagDTOs);
+        courseDTO.setCourse_category(categoryDTO);
         courseDTO.setCreated_at(course.getCreatedAt());
         courseDTO.setLike_count(course.getLikeCount());
         courseDTO.setCourse_places(coursePlaceDTOs);

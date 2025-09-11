@@ -37,9 +37,8 @@ public class CourseController {
     // 코스 페이지 열람시 우측 컴포넌트에 표시
     @GetMapping
     public ResponseEntity<List<CourseDTO>> getAllCourses(
-        @RequestParam(name = "region", required = false) String region,
-        @RequestParam(name = "category", required = false) String category) {
-        List<CourseDTO> courseDTOs = courseService.findCourseAll(region, category);
+        @RequestParam(name = "region", required = false) String region) {
+        List<CourseDTO> courseDTOs = courseService.findCourseAll(region);
         
         if (courseDTOs == null || courseDTOs.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
