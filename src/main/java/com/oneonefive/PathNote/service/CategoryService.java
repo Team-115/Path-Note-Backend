@@ -38,6 +38,19 @@ public class CategoryService {
         return categoryDTOs;
     }
 
+    // 카테고리 시작하는 글자로 조회
+    @Transactional
+    public List<CategoryDTO> getCategoreisStartingWith(String content) {
+        List<CategoryDTO> categoryDTOs = new ArrayList<>();
+        for (Category category : categoryRepository.findByContentStartingWith(content)) {
+            CategoryDTO categoryDTO = new CategoryDTO();
+            categoryDTO.setCategory_id(category.getCategoryId());
+            categoryDTO.setContent(category.getContent());
+            categoryDTOs.add(categoryDTO);
+        }
+        return categoryDTOs;
+    }
+
     // 카테고리 엔티티 불러오기
     @Transactional
     public Category getAndCreateCategory(String content) {
