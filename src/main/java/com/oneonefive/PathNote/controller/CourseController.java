@@ -102,4 +102,59 @@ public class CourseController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    // GET /api/courses/search
+    // 키워드 기반 코스 검색 (임베딩 벡터 유사도 활용)
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseDTO>> searchCoursesByKeyword(
+        @RequestParam(name = "keyword") String keyword,
+        @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
+        List<CourseDTO> courseDTOs = courseService.searchCoursesByKeyword(keyword.trim(), limit);
+        
+        if (courseDTOs.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(courseDTOs, HttpStatus.OK);
+        }
+    }
+
+    // POST /api/courses/{course_id}/update-embedding
+    // 특정 코스의 임베딩 벡터 업데이트 (관리용)
+    @PostMapping("/{course_id}/update-embedding")
+    public ResponseEntity<Void> updateCourseEmbedding(@PathVariable Long course_id, @AuthenticationPrincipal User user) {
+        boolean success = courseService.updateCourseEmbedding(course_id);
+        if (success) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // GET /api/courses/null-embeddings
+    // 임베딩이 null인 코스들 조회 (Python 스케줄링용)
+    @GetMapping("/null-embeddings")
+    public ResponseEntity<List<CourseDTO>> getCoursesWithNullEmbedding() {
+        List<CourseDTO> courseDTOs = courseService.getCoursesWithNullEmbedding();
+        return new ResponseEntity<>(courseDTOs, HttpStatus.OK);
+    }
+
+    // POST /api/courses/{course_id}/embedding
+    // 코스 임베딩 벡터 직접 업데이트 (Python에서 사용)
+    @PostMapping("/{course_id}/embedding")
+    public ResponseEntity<Void> updateCourseEmbeddingWithVector(
+        @PathVariable Long course_id, 
+        @RequestBody List<Double> embedding) {
+        
+        boolean success = courseService.updateCourseEmbeddingWithVector(course_id, embedding);
+        if (success) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -73,4 +73,8 @@ public class Course {
     @Column(name = "center_y")
     private Double centerY;
 
+    // 임베딩 벡터 (JSON 형태로 저장)
+    @Column(name = "embedding_vector", columnDefinition = "TEXT")
+    private String embeddingVector;
+
 }

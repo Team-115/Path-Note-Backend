@@ -23,4 +23,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT DISTINCT c FROM Course c JOIN c.coursePlaces cp JOIN cp.place p WHERE p.placeAddress LIKE :region% AND c.courseCategory LIKE %:category%")
     List<Course> findByPlaceAddressStartingWithAndCourseCategory(@Param("region") String region, @Param("category") String category);
 
+    // 임베딩 벡터가 null인 코스들 조회 (Python 스케줄링용)
+    List<Course> findByEmbeddingVectorIsNull();
+
 }

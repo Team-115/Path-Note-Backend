@@ -2,10 +2,15 @@ package com.oneonefive.PathNote.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceDTO;
@@ -43,6 +48,11 @@ public class CourseService {
 
     @Autowired
     private HashtagRepository hashtagRepository;
+
+    @Autowired
+    private EmbeddingService embeddingService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // 코스 전체 조회
     @Transactional
@@ -273,6 +283,10 @@ public class CourseService {
         course.setCenterX(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0));
         course.setCenterY(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0));
 
+        // 임베딩 벡터는 null로 저장 (Python 스케줄링으로 나중에 처리)
+        course.setEmbeddingVector(null);
+        courseRepository.save(course);
+
         // 코스 DTO 생성
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourse_id(course.getCourseId());
@@ -395,6 +409,202 @@ public class CourseService {
         }
         else {
             return false;
+        }
+    }
+
+    // 키워드 검색 (임베딩 기반)
+    @Transactional
+    public List<CourseDTO> searchCoursesByKeyword(String keyword, int limit) {
+        try {
+            // 키워드의 임베딩 벡터 생성
+            List<Double> keywordEmbedding = embeddingService.getEmbedding(keyword);
+            System.out.println(keywordEmbedding);
+            System.out.println("sdfsadf");
+            if (keywordEmbedding == null) {
+                return new ArrayList<>();
+            }
+
+            // 모든 코스 조회
+            List<Course> allCourses = courseRepository.findAll();
+            
+            // 유사도 계산 및 정렬
+            List<CourseWithSimilarity> coursesWithSimilarity = new ArrayList<>();
+            
+            for (Course course : allCourses) {
+                if (course.getEmbeddingVector() != null) {
+                    try {
+                        List<Double> courseEmbedding = objectMapper.readValue(
+                            course.getEmbeddingVector(), 
+                            new TypeReference<List<Double>>() {}
+                        );
+                        
+                        double similarity = calculateCosineSimilarity(keywordEmbedding, courseEmbedding);
+                        coursesWithSimilarity.add(new CourseWithSimilarity(course, similarity));
+                    } catch (Exception e) {
+                        System.err.println("Error parsing embedding for course " + course.getCourseId() + ": " + e.getMessage());
+                    }
+                }
+            }
+            
+            // 유사도 기준으로 정렬하고 상위 결과만 선택
+            List<Course> topCourses = coursesWithSimilarity.stream()
+                    .sorted(Comparator.comparingDouble(CourseWithSimilarity::getSimilarity).reversed())
+                    .limit(limit)
+                    .map(CourseWithSimilarity::getCourse)
+                    .collect(Collectors.toList());
+            
+            // CourseDTO로 변환
+            return convertCoursesToDTOs(topCourses);
+            
+        } catch (Exception e) {
+            System.err.println("Error in keyword search: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    // 코스 임베딩 벡터 업데이트
+    @Transactional
+    public boolean updateCourseEmbedding(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course != null) {
+            List<Double> embedding = embeddingService.getCourseEmbedding(
+                course.getCourseName(), 
+                course.getCourseDescription(), 
+                course.getCourseCategory()
+            );
+            
+            if (embedding != null) {
+                try {
+                    String embeddingJson = objectMapper.writeValueAsString(embedding);
+                    course.setEmbeddingVector(embeddingJson);
+                    courseRepository.save(course);
+                    return true;
+                } catch (Exception e) {
+                    System.err.println("Error saving embedding for course " + courseId + ": " + e.getMessage());
+                }
+            }
+        }
+        return false;
+    }
+
+    // 임베딩이 null인 코스들 조회 (Python 스케줄링용)
+    @Transactional
+    public List<CourseDTO> getCoursesWithNullEmbedding() {
+        List<Course> courses = courseRepository.findByEmbeddingVectorIsNull();
+        return convertCoursesToDTOs(courses);
+    }
+
+    // 코스 일괄 임베딩 업데이트 (Python에서 임베딩 값을 전달받아 저장)
+    @Transactional
+    public boolean updateCourseEmbeddingWithVector(Long courseId, List<Double> embedding) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course != null && embedding != null) {
+            try {
+                String embeddingJson = objectMapper.writeValueAsString(embedding);
+                course.setEmbeddingVector(embeddingJson);
+                courseRepository.save(course);
+                return true;
+            } catch (Exception e) {
+                System.err.println("Error saving embedding vector for course " + courseId + ": " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    // 코사인 유사도 계산
+    private double calculateCosineSimilarity(List<Double> vectorA, List<Double> vectorB) {
+        if (vectorA.size() != vectorB.size()) {
+            return 0.0;
+        }
+        
+        double dotProduct = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+        
+        for (int i = 0; i < vectorA.size(); i++) {
+            dotProduct += vectorA.get(i) * vectorB.get(i);
+            normA += Math.pow(vectorA.get(i), 2);
+            normB += Math.pow(vectorB.get(i), 2);
+        }
+        
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+    // Course를 CourseDTO로 변환하는 헬퍼 메서드
+    private List<CourseDTO> convertCoursesToDTOs(List<Course> courses) {
+        List<CourseDTO> courseDTOs = new ArrayList<>();
+
+        for (Course course : courses) {
+            
+            // 해쉬태그 DTO 생성
+            List<HashtagDTO> hashtagDTOs = new ArrayList<>();
+            for (Hashtag hashtag : course.getHashtags()) {
+                HashtagDTO hashtagDTO = new HashtagDTO();
+                hashtagDTO.setContent(hashtag.getContent());
+                hashtagDTOs.add(hashtagDTO);
+            }
+            // (코스-장소 DTO 리스트) 생성
+            List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
+            // 코스와 연관관계가 맺어져있는 CoursePlace를 CoursePlaceDTO로 변환 후 (코스-장소 DTO 리스트)에 저장
+            for (CoursePlace coursePlace : course.getCoursePlaces()) {
+                CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
+                coursePlace.getPlace().getPoiId(),
+                coursePlace.getSequenceIndex(),
+                coursePlace.getPlace().getPlaceName(),
+                coursePlace.getPlace().getPlaceCategory(),
+                coursePlace.getPlace().getPlaceAddress(),
+                coursePlace.getPlace().getPlaceCoordinateX(),
+                coursePlace.getPlace().getPlaceCoordinateY(),
+                coursePlace.getEnterTime(),
+                coursePlace.getLeaveTime()
+                );
+                coursePlaceDTOs.add(coursePlaceDTO);
+            }
+
+            User user = userRepository.findById(course.getUserId()).orElse(null);
+            UserDTO userDTO = new UserDTO();
+            userDTO.setNickname(user.getNickname());
+            userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
+            // (코스 DTO) 생성
+            CourseDTO courseDTO = new CourseDTO(
+                course.getCourseId(),
+                userDTO,
+                course.getCourseName(),
+                course.getCourseDescription(),
+                course.getCourseCategory(),
+                hashtagDTOs,
+                course.getCreatedAt(),
+                course.getLikeCount(),
+                // (코스-장소 DTO 리스트) 삽입
+                coursePlaceDTOs,
+                coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0),
+                coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0)
+            );
+
+            // (코스 DTO 리스트)에 (코스 DTO) 추가
+            courseDTOs.add(courseDTO);
+        }
+
+        // (코스 DTO 리스트) 반환
+        return courseDTOs;
+    }
+
+    // 유사도와 함께 코스를 저장하는 내부 클래스
+    private static class CourseWithSimilarity {
+        private final Course course;
+        private final double similarity;
+
+        public CourseWithSimilarity(Course course, double similarity) {
+            this.course = course;
+            this.similarity = similarity;
+        }
+
+        public Course getCourse() {
+            return course;
+        }
+
+        public double getSimilarity() {
+            return similarity;
         }
     }
     
