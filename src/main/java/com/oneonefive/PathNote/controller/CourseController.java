@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oneonefive.PathNote.dto.CourseDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
+import com.oneonefive.PathNote.dto.SearchDTO;
+import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.User;
 import com.oneonefive.PathNote.service.CourseService;
 
@@ -33,6 +36,7 @@ public class CourseController {
     private final CourseService courseService;
 
     // GET /api/courses
+    // GET /api/courses?region={region}
     // 코스 전체 조회
     // 코스 페이지 열람시 우측 컴포넌트에 표시
     @GetMapping
@@ -99,6 +103,19 @@ public class CourseController {
         }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // GET /api/courses/search
+    // GET /api/courses/search?keword={keyword}&limit={limit}
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseDTO>> searchCourse(@RequestParam(name = "keyword") String keyword, @RequestParam(name = "limit", required = false, defaultValue = "10") Long limit) {
+        List<CourseDTO> courseDTOs = courseService.searchCourse(keyword, limit);
+        if (courseDTOs == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else {
+            return new ResponseEntity<>(courseDTOs, HttpStatus.OK);
         }
     }
 }

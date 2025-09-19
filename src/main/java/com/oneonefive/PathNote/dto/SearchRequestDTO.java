@@ -10,11 +10,8 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
+public class SearchRequestDTO {
+    
+    private String keyword;
 
-    // 카테고리 ID
-    private Long category_id;
-
-    // 댓글 내용
-    private String content;
 }

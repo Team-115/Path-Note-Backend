@@ -2,10 +2,14 @@ package com.oneonefive.PathNote.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.oneonefive.PathNote.dto.CategoryDTO;
 import com.oneonefive.PathNote.dto.CourseDTO;
@@ -13,6 +17,8 @@ import com.oneonefive.PathNote.dto.CoursePlaceDTO;
 import com.oneonefive.PathNote.dto.CoursePlaceRequestDTO;
 import com.oneonefive.PathNote.dto.CourseRequestDTO;
 import com.oneonefive.PathNote.dto.HashtagDTO;
+import com.oneonefive.PathNote.dto.SearchDTO;
+import com.oneonefive.PathNote.dto.SearchRequestDTO;
 import com.oneonefive.PathNote.dto.UserDTO;
 import com.oneonefive.PathNote.entity.Course;
 import com.oneonefive.PathNote.entity.CoursePlace;
@@ -47,6 +53,30 @@ public class CourseService {
 
     @Autowired
     private CategoryService categoryService;
+ 
+    // WebClient를 필드에 추가합니다.
+    private final WebClient webClient;
+    
+    // FastAPI 서버의 기본 URL을 설정합니다. (실제 주소로 변경 필요)
+    private final String FASTAPI_BASE_URL = "http://127.0.0.1:8000"; 
+
+    @Autowired
+    public CourseService(WebClient.Builder webClientBuilder, CourseRepository courseRepository, 
+                         PlaceRepository placeRepository, CoursePlaceRepository coursePlaceRepository, 
+                         UserRepository userRepository, CategoryRepository categoryRepository, 
+                         CategoryService categoryService) {
+                            
+        // 기존 Autowired 필드 초기화 (필요하다면)
+        this.courseRepository = courseRepository;
+        this.placeRepository = placeRepository;
+        this.coursePlaceRepository = coursePlaceRepository;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
+        
+        // WebClient 인스턴스 초기화
+        this.webClient = webClientBuilder.baseUrl(FASTAPI_BASE_URL).build();
+    }
 
     // 코스 전체 조회
     @Transactional
@@ -166,6 +196,114 @@ public class CourseService {
         courseDTO.setCenter_x(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0));
         courseDTO.setCenter_y(coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0));
         return courseDTO;
+
+    }
+
+    // 코스 검색
+    @Transactional
+    public List<CourseDTO> searchCourse(String keyword, Long limit) {
+        
+        // 1. FastAPI가 요구하는 형식에 맞춰 KeywordRequestDTO를 생성
+        SearchRequestDTO requestBody = new SearchRequestDTO(keyword);
+
+        SearchDTO embeddingResponse;
+        try {
+            // 2. WebClient POST 요청 수정
+            //    - URI: "/embed/course" (FastAPI가 사용하는 엔드포인트)
+            //    - bodyValue: KeywordRequestDTO 객체 전송
+            //    - bodyToMono: FastAPI의 응답 DTO에 맞춰 변경
+            embeddingResponse = webClient.post()
+                .uri("/embed/course") // FastAPI의 API 경로
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody) // 👈 가장 중요! 'keyword'만 담긴 객체 전송
+                .retrieve()
+                .onStatus(
+                    status -> status.is4xxClientError() || status.is5xxServerError(),
+                    response -> response.bodyToMono(String.class).map(
+                        errorBody -> new RuntimeException("FastAPI 임베딩 실패: " + errorBody)
+                    )
+                )
+                .bodyToMono(SearchDTO.class) // 👈 응답 타입을 새로운 DTO로 변경
+                .block();
+
+            // 3. 임베딩 벡터를 이용한 DB 유사도 검색 (후속 로직)
+            List<Double> searchVector;
+            try {
+                // FastAPI 응답에서 'search_query_combined' 키에 해당하는 벡터 추출
+                searchVector = embeddingResponse.getEmbeddings().get("search_query_combined");
+                if (searchVector == null) {
+                    System.err.println("FastAPI 응답에 'search_query_combined' 벡터가 없습니다.");
+                    return Collections.emptyList();
+                }
+            
+                // 4. Repository 호출 시 벡터를 전달
+                String searchVectorString = searchVector.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", ", "[", "]"));
+                List<Course> similarCourses = courseRepository.findSimilarCoursesByVector(searchVectorString, limit.intValue());
+            
+                // 5. 최종 결과를 반환
+                // (코스 DTO 리스트) 생성
+                List<CourseDTO> courseDTOs = new ArrayList<>();
+
+                for (Course course : similarCourses) {
+
+                    // (코스-장소 DTO 리스트) 생성
+                    List<CoursePlaceDTO> coursePlaceDTOs = new ArrayList<>();
+                    // 코스와 연관관계가 맺어져있는 CoursePlace를 CoursePlaceDTO로 변환 후 (코스-장소 DTO 리스트)에 저장
+                    for (CoursePlace coursePlace : course.getCoursePlaces()) {
+                        CoursePlaceDTO coursePlaceDTO = new CoursePlaceDTO (
+                        coursePlace.getPlace().getPoiId(),
+                        coursePlace.getSequenceIndex(),
+                        coursePlace.getPlace().getPlaceName(),
+                        coursePlace.getPlace().getPlaceCategory(),
+                        coursePlace.getPlace().getPlaceAddress(),
+                        coursePlace.getPlace().getPlaceCoordinateX(),
+                        coursePlace.getPlace().getPlaceCoordinateY(),
+                        coursePlace.getEnterTime(),
+                        coursePlace.getLeaveTime()
+                        );
+                        coursePlaceDTOs.add(coursePlaceDTO);
+                    }
+
+                    User user = userRepository.findById(course.getUserId()).orElse(null);
+                    UserDTO userDTO = new UserDTO();
+                    userDTO.setNickname(user.getNickname());
+                    userDTO.setProfilePresetURL(String.format("http://localhost:8080/images/%s.png", user.getProfilePreset()));
+                    CategoryDTO categoryDTO = new CategoryDTO();
+                    categoryDTO.setCategory_id(course.getCourseCategory().getCategoryId());
+                    categoryDTO.setContent(course.getCourseCategory().getContent());
+                    // (코스 DTO) 생성
+                    CourseDTO courseDTO = new CourseDTO(
+                        course.getCourseId(),
+                        userDTO,
+                        course.getCourseName(),
+                        course.getCourseDescription(),
+                        categoryDTO,
+                        course.getCreatedAt(),
+                        course.getLikeCount(),
+                        // (코스-장소 DTO 리스트) 삽입
+                        coursePlaceDTOs,
+                        coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_x).average().orElse(0.0),
+                        coursePlaceDTOs.stream().mapToDouble(CoursePlaceDTO::getPlace_coordinate_y).average().orElse(0.0)
+                    );
+
+                    // (코스 DTO 리스트)에 (코스 DTO) 추가
+                    courseDTOs.add(courseDTO);
+                }
+
+                // (코스 DTO 리스트) 반환
+                return courseDTOs;
+            }
+            catch (Exception e) {
+                System.err.println("응답에서 벡터 추출 실패: " + e.getMessage());
+                return Collections.emptyList();
+            }
+        }
+        catch (Exception e) {
+            System.err.println("임베딩 API 호출 실패: " + e.getMessage());
+            return Collections.emptyList();
+        }
 
     }
 

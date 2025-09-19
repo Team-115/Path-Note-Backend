@@ -16,4 +16,14 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT DISTINCT c FROM Course c JOIN c.coursePlaces cp JOIN cp.place p WHERE p.placeAddress LIKE :region%")
     List<Course> findByPlaceAddressStartingWith(@Param("region") String region);
 
+    @Query(value = """
+        SELECT c.*
+        FROM courses c
+        ORDER BY c.embedding_vector <-> :searchVector :: vector
+        LIMIT :limit
+        """, nativeQuery = true)
+    List<Course> findSimilarCoursesByVector(
+        @Param("searchVector") String searchVector,
+        @Param("limit") int limit
+    );
 }
