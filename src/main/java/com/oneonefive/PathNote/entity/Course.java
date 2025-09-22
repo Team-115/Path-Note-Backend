@@ -74,4 +74,7 @@ public class Course {
     @Column(name = "center_y")
     private Double centerY;
 
+    // 임베딩 벡터
+    @Column(name = "embedding_vector", columnDefinition = "vector")
+    private String embeddingVector;
 }

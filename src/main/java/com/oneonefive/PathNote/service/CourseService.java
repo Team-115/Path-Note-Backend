@@ -241,7 +241,6 @@ public class CourseService {
                     .map(String::valueOf)
                     .collect(Collectors.joining(", ", "[", "]"));
                 List<Course> similarCourses = courseRepository.findSimilarCoursesByVector(searchVectorString, limit.intValue());
-            
                 // 5. 최종 결과를 반환
                 // (코스 DTO 리스트) 생성
                 List<CourseDTO> courseDTOs = new ArrayList<>();

@@ -57,7 +57,7 @@ public class CourseController {
     // 코스 단일 조회
     // 코스 페이지 열람 후 우측 컴포넌트 클릭 시 조회
     @GetMapping("/{course_id}")
-    public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long course_id) {
+    public ResponseEntity<CourseDTO> getCourseById(@PathVariable("course_id") Long course_id) {
         CourseDTO courseDTO = courseService.findCourseById(course_id);
 
         if (courseDTO != null) {
