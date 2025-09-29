@@ -32,7 +32,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable()) // CSRF 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/css/**", "/js/**", "/oauth2/**", "/login/oauth2/**", "/api/users/refresh","/api/categories/**").permitAll()
+                .requestMatchers("/", "/css/**", "/js/**", "/oauth2/**", "/login/oauth2/**", "/api/users/refresh", "/api/categories", "/api/categories/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )

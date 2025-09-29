@@ -11,6 +11,9 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: pathnote_user
     password: 12345
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   
   jpa:
     hibernate:

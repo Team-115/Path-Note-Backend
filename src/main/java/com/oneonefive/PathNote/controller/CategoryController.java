@@ -31,7 +31,7 @@ public class CategoryController {
     // GET /api/categories/{category_name}
     // 카테고리 시작하는 글자로 조회
     @GetMapping("/{category_name}")
-    public List<CategoryDTO> getCategoriesByContent(@PathVariable String category_name) {
+    public List<CategoryDTO> getCategoriesByContent(@PathVariable("category_name") String category_name) {
         return categoryService.getCategoreisStartingWith(category_name);
     }
 }
